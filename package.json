@@ -1,0 +1,14 @@
+{
+  "name": "kodker",
+  "version": "0.1.0",
+  "description": "کۆدکەر — زمانی پڕۆگرامینگی کوردی کە دەگۆڕدرێت بۆ JavaScript | A Kurdish (Sorani) programming language",
+  "main": "docs/kodker.js",
+  "bin": { "kodker": "bin/kodker.js" },
+  "scripts": {
+    "test": "node --test \"tests/*.test.js\"",
+    "build": "node scripts/build-examples.js"
+  },
+  "keywords": ["kurdish", "sorani", "programming-language", "education", "transpiler", "کوردی"],
+  "license": "MIT",
+  "engines": { "node": ">=18" }
+}
