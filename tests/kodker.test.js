@@ -124,7 +124,7 @@ test('هەموو نموونەکان کار دەکەن', () => {
   for (const f of files) {
     const r = out(fs.readFileSync(path.join(dir, f), 'utf8'));
     assert.ok(r.ok, `${f}: ${r.error}`);
-    assert.ok(r.lines.length > 0, `${f}: دەرچوونی نییە`);
+    assert.ok(r.lines.length > 0 || r.gfx, `${f}: نە دەرچوونی هەیە نە وێنە`);
   }
 });
 
@@ -156,15 +156,15 @@ test('هایلایت: ناوی کار و میتۆد', () => {
 
 test('وانەکان: وەڵامی هەر وانەیەک دەبێت تێپەڕێت', () => {
   const { lessons, check } = require('../docs/lessons.js');
-  assert.ok(lessons.length >= 10);
+  assert.ok(lessons.length >= 14);
   for (const [i, l] of lessons.entries()) {
     const r = out(l.solution);
     assert.ok(r.ok, `وانە ${i + 1}: ${r.error}`);
-    const c = check(l, r.lines, l.solution, K);
+    const c = check(l, r.lines, l.solution, K, r.gfx);
     assert.ok(c.ok, `وانە ${i + 1} (${l.title}): ${c.reason} ${JSON.stringify(c.got)}`);
     // کۆدی دەستپێک نابێت خۆی بەخۆی تێپەڕێت
     const s = out(l.starter);
-    assert.ok(!check(l, s.lines, l.starter, K).ok, `وانە ${i + 1}: کۆدی دەستپێک پێشتر وەڵامە`);
+    assert.ok(!check(l, s.lines, l.starter, K, s.gfx).ok, `وانە ${i + 1}: کۆدی دەستپێک پێشتر وەڵامە`);
   }
 });
 
@@ -176,7 +176,8 @@ const labels = (src, pos) => {
 
 test('تەواوکردن: فەنکشنی ئامادەکراو و وشە سەرەکییەکان', () => {
   assert.deepStrictEqual(labels('چا'), ['چاپ']);
-  assert.deepStrictEqual(labels('ئە'), ['ئەمە', 'ئەگەر', 'ئەگەرنا']);
+  // وشە سەرەکییەکان یەکەمن، پاشان فەنکشنەکان (لەوانە فەنکشنەکانی کێشان)
+  assert.deepStrictEqual(labels('ئە'), ['ئەمە', 'ئەگەر', 'ئەگەرنا', 'ئەستووریبکە', 'ئەستێرە', 'ئەستێرەهێڵ']);
 });
 
 test('تەواوکردن: ڕیزبەندی (وشە، فەنکشن، گۆڕاو)', () => {
@@ -216,9 +217,9 @@ test('تەواوکردن: نە لە ناوەڕاستی وشە، نە بێ پێش
 test('تەواوکردن: وشەی تەواو و بێ قاڵب پێشنیار نابێت، بەڵام قاڵبەکان دەمێننەوە', () => {
   assert.strictEqual(labels('ل.درێژی'), null);          // میتۆدی بێ قاڵب
   assert.strictEqual(labels('هیچ'), null);               // وشەی بێ قاڵب
-  const r = K.completions('بۆ', 2);                      // «بۆ» تەواو نووسراوە، بەڵام قاڵبی هەیە
-  assert.deepStrictEqual(r.items.map((i) => i.template), ['بۆ i لە ١ تا $0 {\n  \n}']);
-  assert.deepStrictEqual(K.completions('کار', 3).items.map((i) => i.template), ['کار $0() {\n  \n}']);
+  const tpl = (src, label) => K.completions(src, src.length).items.find((i) => i.label === label).template;
+  assert.strictEqual(tpl('بۆ', 'بۆ'), 'بۆ i لە ١ تا $0 {\n  \n}');   // «بۆ» تەواو نووسراوە، بەڵام قاڵبی هەیە
+  assert.strictEqual(tpl('کار', 'کار'), 'کار $0() {\n  \n}');
 });
 
 test('تەواوکردن: پیتی عەرەبی (ك) یەکدەخرێت', () => {
@@ -248,4 +249,84 @@ test('تەواوکردن: هەموو قاڵبەکان $0 یان کۆدی درو�
     const it = r.items.find((i) => i.label === kw);
     assert.ok(it && it.template.includes('$0'), kw + ' قاڵبی نییە');
   }
+});
+
+// ── کێشان ──
+const draw = (src) => { const r = K.run(src, { print() {} }); return { ...r, cmds: r.gfx ? r.gfx.frames.flat() : [] }; };
+
+test('کێشان: بێ فەرمانی کێشان gfx نییە', () => {
+  assert.strictEqual(K.run('چاپ(١)', { print() {} }).gfx, null);
+});
+
+test('کێشان: شێوەکان و ڕەنگی کوردی', () => {
+  const r = draw('قەبارە(٣٠٠، ٢٠٠)\nڕەنگبکە("سوور")\nبازنە(٥٠، ٦٠، ٢٠)\nلاکێش(١، ٢، ٣، ٤)\nنووسین("سڵاو"، ١٠٠، ٥٠)');
+  assert.ok(r.ok, r.error);
+  assert.strictEqual(r.gfx.width, 300);
+  assert.strictEqual(r.gfx.height, 200);
+  assert.deepStrictEqual(r.cmds, [
+    ['fill', '#ed2024'], ['circle', 50, 60, 20, 'f'], ['rect', 1, 2, 3, 4, 'f'], ['text', 'سڵاو', 100, 50, 24],
+  ]);
+});
+
+test('کێشان: قەڵەمی کیسە چوارگۆشە دەکێشێت', () => {
+  const r = draw('قەبارە(٢٠٠، ٢٠٠)\nبۆ i لە ١ تا ٤ {\n  پێشەوە(٥٠)\n  بۆڕاست(٩٠)\n}');
+  assert.ok(r.ok, r.error);
+  const lines = r.cmds.filter((c) => c[0] === 'line').map((c) => c.slice(1).map((n) => Math.round(n)));
+  assert.deepStrictEqual(lines, [[100, 100, 100, 50], [100, 50, 150, 50], [150, 50, 150, 100], [150, 100, 100, 100]]);
+});
+
+test('کێشان: قەڵەم بەرز = نەکێشان', () => {
+  const r = draw('قەڵەمبەرز()\nپێشەوە(٣٠)\nقەڵەمدابنێ()\nپێشەوە(٣٠)');
+  assert.strictEqual(r.cmds.filter((c) => c[0] === 'line').length, 1);
+});
+
+test('کێشان: فریم و ئەنیمەیشن', () => {
+  const r = draw('بۆ x لە ١ تا ٥ {\n  بازنە(x * ١٠، ٥٠، ٥)\n  فریم()\n}');
+  assert.strictEqual(r.gfx.frames.length, 5);                 // فریمی بەتاڵی کۆتایی لادەبرێت
+  assert.ok(r.gfx.frames.every((f) => f.length === 1));
+});
+
+test('کێشان: ڕەنگی پەلکەزێڕینە و rgb', () => {
+  const r = draw('ڕەنگبکە(ڕەنگی(١، ٢، ٣))\nڕەنگبکە(پەلکەزێڕینە(-٣٠، ٠٫٥))');
+  assert.deepStrictEqual(r.cmds, [['fill', 'rgb(1,2,3)'], ['fill', 'hsla(330,85%,55%,0.5)']]);
+});
+
+test('کێشان: هەڵەی کوردی بۆ ژمارەی هەڵە و سنووردارکردن', () => {
+  assert.match(draw('بازنە("x"، ١، ٢)').error, /ژمارەیەک پێویستە/);
+  assert.match(draw('ڕەنگبکە(٥)').error, /ڕەنگ دەبێت دەق بێت/);
+  const lim = draw('هەتا ڕاست {\n  بازنە(١، ١، ١)\n  فریم()\n}');
+  assert.strictEqual(lim.ok, false);
+  assert.match(lim.error, /کێشانەکە زۆر گەورە/);
+  assert.ok(lim.gfx && lim.gfx.frames.length > 1);          // ئەوەی کێشرابوو دەمێنێتەوە
+});
+
+test('کێشان: لە کاتی هەڵەدا ئەوەی کێشرابوو دەمێنێتەوە', () => {
+  const r = draw('بازنە(١، ٢، ٣)\nچاپ(نەزانراو)');
+  assert.strictEqual(r.ok, false);
+  assert.strictEqual(r.cmds.length, 1);
+});
+
+test('کێشان: هایلایت و تەواوکردن فەرمانەکانی کێشان دەناسن', () => {
+  assert.match(K.highlight('بازنە(١، ٢، ٣)'), /<span class="t-f">بازنە<\/span>/);
+  assert.ok(labels('بازن').includes('بازنە'));
+});
+
+test('canvas.js: فەرمانەکان بە دروستی لەسەر ctx جێبەجێ دەبن', () => {
+  const C = require('../docs/canvas.js');
+  const calls = [];
+  const ctx = new Proxy({}, {
+    get: (t, k) => (k in t ? t[k] : (...a) => calls.push([k, ...a])),
+    set: (t, k, v) => { t[k] = v; calls.push(['set:' + k, v]); return true; },
+  });
+  C.apply(ctx, ['fill', '#ed2024'], 100, 100);
+  C.apply(ctx, ['rect', 1, 2, 3, 4, 'f'], 100, 100);
+  C.apply(ctx, ['rect', 1, 2, 3, 4, 's'], 100, 100);
+  C.apply(ctx, ['circle', 5, 5, 3, 'f'], 100, 100);
+  C.apply(ctx, ['sun', 50, 50, 10], 100, 100);
+  C.apply(ctx, ['text', 'سڵاو', 10, 20, 30], 100, 100);
+  assert.deepStrictEqual(calls.filter((c) => c[0] === 'set:fillStyle')[0], ['set:fillStyle', '#ed2024']);
+  assert.ok(calls.some((c) => c[0] === 'fillRect' && c[1] === 1));
+  assert.ok(calls.some((c) => c[0] === 'strokeRect'));
+  assert.strictEqual(calls.filter((c) => c[0] === 'lineTo').length, 42);   // خۆر: ٢١ تیشک × ٢
+  assert.ok(calls.some((c) => c[0] === 'fillText' && c[1] === 'سڵاو'));
 });

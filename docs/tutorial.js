@@ -15,8 +15,12 @@
   let cur = 0;
   let job = null;
 
-  const output = $('output'), msg = $('msg'), status = $('status'), hintbox = $('hintbox');
+  const output = $('output'), cvPane = $('canvas-pane'), msg = $('msg'), status = $('status'), hintbox = $('hintbox');
   const editor = KodkerEditor.create($('editor'), { onRun: () => run() });
+  const player = KodkerCanvas.mount($('cv'), {
+    onProgress: (i, n) => { $('cv-info').textContent = n > 1 ? 'فریم ' + i + ' / ' + n : ''; },
+  });
+  $('cv-replay').addEventListener('click', () => player.replay());
 
   function renderList() {
     const ol = $('list');
@@ -51,6 +55,8 @@
     document.querySelectorAll('#body pre.ex').forEach((p) => { p.innerHTML = Kodker.highlight(p.textContent); });
     editor.setValue(store.get(DRAFT_KEY(cur), l.starter));
     output.textContent = '';
+    player.stop();
+    cvPane.hidden = true;
     setStatus('');
     hintbox.hidden = true;
     setMsg('کۆدەکەت بنووسە و «جێبەجێبکە» دابگرە.');
@@ -75,13 +81,14 @@
         const d = document.createElement('div'); d.textContent = t; output.appendChild(d);
       },
       done: (r) => {
+        if (r.gfx) { cvPane.hidden = false; player.play(r.gfx); } else { player.stop(); cvPane.hidden = true; }
         if (!r.ok) {
           const d = document.createElement('div'); d.className = 'err'; d.textContent = '✖ ' + r.error; output.appendChild(d);
           setStatus('هەڵە', 'bad');
           setMsg('✖ هەڵەیەک هەیە: ' + escapeHtml(r.error), 'bad');
           return;
         }
-        const c = check(l, lines, src, Kodker);
+        const c = check(l, lines, src, Kodker, r.gfx);
         if (c.ok) {
           setStatus('✓ ڕاستە', 'ok');
           const last = cur === lessons.length - 1;

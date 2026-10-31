@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>فێرکاری — کۆدکەر</title>
-  <meta name="description" content="فێربوونی پڕۆگرامینگ بە کوردی، هەنگاو بە هەنگاو. ١١ وانە لە گۆڕاو هەتا پۆل، بە ئەرک و پشکنینی خۆکار.">
+  <meta name="description" content="فێربوونی پڕۆگرامینگ بە کوردی، هەنگاو بە هەنگاو. ١٤ وانە لە گۆڕاو هەتا کێشان و ئەنیمەیشن، بە ئەرک و پشکنینی خۆکار.">
   <meta name="theme-color" content="#0b0f1f">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
@@ -54,6 +54,13 @@
         <section class="pane">
           <div class="bar"><b>دەرچوون</b><span id="status" class="status"></span></div>
           <pre id="output" class="out" dir="rtl"></pre>
+          <div id="canvas-pane" class="cv-pane" hidden>
+            <div class="cv-stage"><canvas id="cv" aria-label="وێنەی کێشراو"></canvas></div>
+            <div class="cv-bar">
+              <button id="cv-replay">↻ دووبارە</button>
+              <span id="cv-info" class="cv-info"></span>
+            </div>
+          </div>
         </section>
       </div>
 
@@ -76,6 +83,7 @@
   <script src="kodker.js"></script>
   <script src="lessons.js"></script>
   <script src="runner.js"></script>
+  <script src="canvas.js"></script>
   <script src="editor.js"></script>
   <script src="tutorial.js"></script>
 </body>

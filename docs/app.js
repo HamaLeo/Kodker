@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   const $ = (id) => document.getElementById(id);
-  const output = $('output'), jsOut = $('js'), status = $('status'), sel = $('examples');
+  const output = $('output'), jsOut = $('js'), cvPane = $('canvas-pane'), tabCanvas = $('tab-canvas'), status = $('status'), sel = $('examples');
   const examples = window.KODKER_EXAMPLES || [];
 
   $('ver').textContent = 'v' + Kodker.VERSION;
@@ -50,9 +50,19 @@
       out: (t) => addLine(t),
       done: (r) => {
         if (r.js != null) jsOut.textContent = r.js;
+        // وێنە: ئەگەر کۆدەکە شتێکی کێشا، تابی وێنە نیشان بدە
+        if (r.gfx) {
+          tabCanvas.hidden = false;
+          player.play(r.gfx);
+          showTab('canvas');
+        } else {
+          player.stop();
+          tabCanvas.hidden = true;
+          if (!cvPane.hidden) showTab('output');
+        }
         if (r.timedOut) { addLine('✖ ' + r.error, 'err'); setStatus('کاتی تەواو بوو', 'bad'); }
         else if (!r.ok) { addLine('✖ ' + r.error, 'err'); setStatus('هەڵە', 'bad'); }
-        else { if (!output.childNodes.length) addLine('(هیچ دەرچوونێک نییە)', 'info'); setStatus('✓ تەواو بوو', 'ok'); }
+        else { if (!output.childNodes.length && !r.gfx) addLine('(هیچ دەرچوونێک نییە)', 'info'); setStatus('✓ تەواو بوو', 'ok'); }
       },
     });
   }
@@ -67,11 +77,23 @@
   });
 
   // ── تابەکان ──
-  document.querySelectorAll('.tab').forEach((b) => b.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach((x) => x.classList.toggle('active', x === b));
-    output.hidden = b.dataset.tab !== 'output';
-    jsOut.hidden = b.dataset.tab !== 'js';
-  }));
+  function showTab(name) {
+    document.querySelectorAll('.tab').forEach((x) => x.classList.toggle('active', x.dataset.tab === name));
+    output.hidden = name !== 'output';
+    jsOut.hidden = name !== 'js';
+    cvPane.hidden = name !== 'canvas';
+  }
+  document.querySelectorAll('.tab').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
+
+  // ── وێنە (Canvas) ──
+  const player = KodkerCanvas.mount($('cv'), {
+    onProgress: (i, n) => { $('cv-info').textContent = n > 1 ? 'فریم ' + i + ' / ' + n : ''; },
+  });
+  $('cv-replay').addEventListener('click', () => player.replay());
+  $('cv-save').addEventListener('click', () => {
+    const a = document.createElement('a');
+    a.href = player.png(); a.download = 'kodker.png'; a.click();
+  });
 
   // ── ڕێنمایی ──
   const guide = [
@@ -83,7 +105,10 @@
     ['لیست', [['ل.درێژی', 'length'], ['ل.زیادبکە(x)', 'push'], ['ل.نەخشە(f)', 'map'], ['ل.پاڵاوتن(f)', 'filter'], ['ل.کۆکردنەوە(f, ٠)', 'reduce'], ['ل.ڕیزبکە()', 'sort']]],
     ['پۆل', [['پۆل ئاژەڵ { }', 'class'], ['کۆنستراکتەر() { }', 'constructor'], ['نوێ ئاژەڵ()', 'new'], ['ئەمە.ناو', 'this']]],
     ['هەڵە', [['تاقیبکەرەوە { }', 'try'], ['گیرکە (کێشە) { }', 'catch'], ['فڕێبدە نوێ Error("..")', 'throw']]],
-    ['بیرکاری', [['ڕەگ(x) · توان(a, b)', 'sqrt · pow'], ['خوارکە · سەرکە · گردبکە', 'floor · ceil · round'], ['هەڕەمەکی(١, ١٠٠)', 'random int'], ['بکەژمارە · بکەدەق', 'Number · String']]],
+    ['کێشان 🎨', [['قەبارە(٤٠٠، ٣٠٠)', 'canvas size'], ['بازنە(x, y, r)', 'circle'], ['لاکێش(x, y, پان, بەرز)', 'rect'], ['هێڵ(x١, y١, x٢, y٢)', 'line'], ['سێگۆشە · ئەستێرە · خۆر', 'triangle · star · sun'], ['نووسین("دەق", x, y)', 'text']]],
+    ['ڕەنگ', [['ڕەنگبکە("سوور")', 'fill'], ['هێڵڕەنگبکە("شین")', 'stroke'], ['ئەستووریبکە(٣)', 'line width'], ['پاشبنەمابکە("ڕەش")', 'background'], ['ڕەنگی(٢٥٥، ٠، ٠)', 'rgb'], ['پەلکەزێڕینە(i * ٣٠)', 'rainbow']]],
+    ['قەڵەمی کیسە و ئەنیمەیشن', [['پێشەوە(n) · دواوە(n)', 'forward · back'], ['بۆچەپ(d) · بۆڕاست(d)', 'turn'], ['قەڵەمبەرز() · قەڵەمدابنێ()', 'pen up · down'], ['فریم()', 'next frame'], ['خێرایی(٦٠)', 'fps']]],
+    ['بیرکاری', [['ڕەگ(x) · توان(a, b)', 'sqrt · pow'], ['خوارکە · سەرکە · گردبکە', 'floor · ceil · round'], ['هەڕەمەکی(١, ١٠٠)', 'random int'], ['سینۆس · کۆسینۆس · پای', 'sin · cos · π'], ['بکەژمارە · بکەدەق', 'Number · String']]],
   ];
   const cards = $('cards');
   guide.forEach(([title, rows]) => {
@@ -110,6 +135,18 @@
   ].join('\n');
   $('demo-kd').innerHTML = Kodker.highlight(demo);
   $('demo-js').textContent = Kodker.transpile(demo);
+
+  // ── ئاڵای کوردستان (پیشاندانی زیندوو) ──
+  const flagEx = examples.find((e) => e.id === '10-flag');
+  if (flagEx) {
+    $('flag-kd').innerHTML = Kodker.highlight(flagEx.code);
+    const r = Kodker.run(flagEx.code, { print() {} });
+    if (r.gfx) KodkerCanvas.mount($('flag-cv')).play(r.gfx);
+    document.querySelector('[data-example="10-flag"]').addEventListener('click', () => {
+      const i = examples.findIndex((e) => e.id === '10-flag');
+      sel.value = i; editor.setValue(examples[i].code); run();
+    });
+  }
 
   run();
 })();

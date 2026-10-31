@@ -265,3 +265,18 @@ button[disabled] { opacity: .4; cursor: not-allowed; }
   html { scroll-behavior: auto; }
   .btn, .feature { transition: none; }
 }
+
+/* ── وێنە (Canvas) ── */
+.cv-pane { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.cv-pane[hidden] { display: none; }
+.cv-stage { flex: 1; display: grid; place-items: center; padding: 14px; background:
+  repeating-conic-gradient(#0e1326 0% 25%, #11172c 0% 50%) 50% / 22px 22px; overflow: auto; }
+.cv-stage canvas { display: block; border-radius: 8px; box-shadow: 0 12px 36px rgba(0,0,0,.55); background: #fff; }
+.cv-bar { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-top: 1px solid var(--line); background: rgba(26,33,64,.5); }
+.cv-info { margin-inline-start: auto; font: .8rem var(--mono); color: var(--muted); }
+.sub { margin: -8px 0 18px; color: #aab5d8; }
+.showcase.draw .code-card pre { min-height: 0; }
+.canvas-card .cv-stage { padding: 16px; min-height: 260px; }
+.tut-play .cv-pane { border-top: 1px solid var(--line); flex: 0 0 auto; }
+.tut-play .cv-stage { padding: 10px; }
+.tut-play #output:empty { display: none; }
