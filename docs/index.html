@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ckb" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>کۆدکەر — پڕۆگرامینگ بە زمانی کوردی</title>
+  <meta name="description" content="کۆدکەر زمانێکی پڕۆگرامینگی کراوەیە بە سینتاکسی کوردی. لە وێبگەڕەکەت کۆد بنووسە و جێبەجێی بکە، بێ دابەزاندن.">
+  <meta property="og:title" content="کۆدکەر — پڕۆگرامینگ بە زمانی کوردی">
+  <meta property="og:description" content="کۆد بنووسە بە زمانی دایکت. ئەگەر، بۆ، چاپ ... بۆ JavaScript دەگۆڕدرێت.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="flag-bar" aria-hidden="true"><i></i><i></i><i></i></div>
+
+  <header class="top">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">☀</span>
+      <h1>کۆدکەر</h1>
+      <span class="ver" id="ver"></span>
+    </div>
+    <nav>
+      <a href="tutorial.html">🎓 فێرکاری</a>
+      <a href="#guide">ڕێنمایی</a>
+      <a href="https://github.com/HamaLeo/kodker" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h2>کۆد بنووسە بە <span class="hl">زمانی دایکت</span></h2>
+    <p>زمانێکی پڕۆگرامینگی کراوە (open-source) بە سینتاکسی کوردی. ڕاستەوخۆ لێرە جێبەجێی بکە، بێ دابەزاندن.</p>
+    <p><a class="cta" href="tutorial.html">🎓 فێرکاری هەنگاو بە هەنگاو دەست پێبکە</a></p>
+  </section>
+
+  <main class="playground">
+    <section class="pane">
+      <div class="bar">
+        <button id="run" class="primary" title="Ctrl + Enter">▶ جێبەجێبکە</button>
+        <select id="examples" aria-label="نموونەکان"></select>
+        <button id="share" title="بەستەرێک دروست بکە">🔗 هاوبەشکردن</button>
+      </div>
+      <div id="editor"></div>
+    </section>
+
+    <section class="pane">
+      <div class="bar tabs">
+        <button class="tab active" data-tab="output">دەرچوون</button>
+        <button class="tab" data-tab="js">JavaScript</button>
+        <span id="status" class="status"></span>
+      </div>
+      <pre id="output" class="out" dir="rtl"></pre>
+      <pre id="js" class="out" dir="ltr" hidden></pre>
+    </section>
+  </main>
+
+  <section class="guide" id="guide">
+    <h2>ڕێنمایی خێرا</h2>
+    <div class="cards" id="cards"></div>
+    <p class="note">
+      تێبینی: ژمارەکان بە ٠١٢٣ یان 0123 هەردووکیان دەنووسرێن. بۆ کۆمێنت <code dir="ltr">//</code> بەکاربهێنە.
+      فاریزەی کوردی «،» دەتوانرێت لە جیاتی «,» بەکاربهێنرێت.
+    </p>
+  </section>
+
+  <footer>
+    دروستکراوە بە ❤️ بۆ کۆمەڵگەی کورد · <a href="https://github.com/HamaLeo/kodker" target="_blank" rel="noopener">سەرچاوە لە GitHub</a> · MIT
+  </footer>
+
+  <script src="kodker.js"></script>
+  <script src="examples.js"></script>
+  <script src="runner.js"></script>
+  <script src="editor.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
