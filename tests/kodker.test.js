@@ -156,7 +156,7 @@ test('هایلایت: ناوی کار و میتۆد', () => {
 
 test('وانەکان: وەڵامی هەر وانەیەک دەبێت تێپەڕێت', () => {
   const { lessons, check } = require('../docs/lessons.js');
-  assert.ok(lessons.length >= 64);
+  assert.ok(lessons.length >= 81);
   for (const [i, l] of lessons.entries()) {
     const r = out(l.solution);
     assert.ok(r.ok, `وانە ${i + 1}: ${r.error}`);
@@ -392,6 +392,11 @@ test('ژمارەی وانەکان لە README و پەڕە دروستە (بۆ ئ�
   assert.ok(read('docs/index.html').includes('<b>' + n + '</b><span>وانە</span>'), 'index.html: ئامار');
   assert.ok(read('docs/index.html').includes(n + ' وانە'), 'index.html: تایبەتمەندی');
   assert.ok(read('docs/tutorial.html').includes(n + ' وانە'), 'tutorial.html: meta');
+  const { chapters } = require('../docs/lessons.js');
+  const nc = kd(chapters.length) + ' بەش';
+  assert.ok(read('README.md').includes(nc), 'README: ژمارەی بەشەکان، پێویستە «' + nc + '» هەبێت');
+  assert.ok(read('docs/index.html').includes(nc), 'index.html: ژمارەی بەشەکان');
+  assert.ok(read('docs/tutorial.html').includes(nc), 'tutorial.html: ژمارەی بەشەکان');
 });
 
 test('هەموو وانەکان: بەکارهێنانی وشەی ناسراو، بێ ڕیزی دووبارە لە بەرنامەی وەڵامدا', () => {
@@ -428,4 +433,51 @@ test('ئەگەری کورت (؟ :) کار دەکات', () => {
   const r = out('چاپ(٥ > ٣ ؟ "ڕاست" : "هەڵە")\nچاپ(٥ < ٣ ؟ "یەک" : "دوو")');
   assert.ok(r.ok, r.error);
   assert.deepStrictEqual(r.lines, ['ڕاست', 'دوو']);
+});
+
+test('کلیلەکان و نرخەکان (فەرمانی ئۆبجێکت)', () => {
+  const r = out('نەگۆڕ ک = { ا: ١، ب: ٢ }\nچاپ(کلیلەکان(ک))\nچاپ(نرخەکان(ک))\nبۆ هەر ن لە کلیلەکان(ک) { چاپ(ن + "=" + ک[ن]) }');
+  assert.ok(r.ok, r.error);
+  assert.deepStrictEqual(r.lines, ['["ا", "ب"]', '[1, 2]', 'ا=1', 'ب=2']);
+  assert.match(K.highlight('کلیلەکان(ک)'), /<span class="t-f">کلیلەکان<\/span>/);
+});
+
+test('وانەی تۆپی جووڵاو: دڵنیا دەبێتەوە لە گەڕانەوە و مانەوە لە کانڤاسدا', () => {
+  const { lessons, check } = require('../docs/lessons.js');
+  const b = lessons.find((x) => x.id === 'bounce');
+  const verdict = (src) => { const r = out(src); return check(b, r.lines, src, K, r.gfx); };
+  const base = 'قەبارە(٣٠٠، ١٠٠)\nگۆڕاو x = ٣٠\nبۆ t لە ١ تا ٦٠ {\n  پاککەرەوە()\n  بازنە(x، ٥٠، ٢٠)\n  x += ';
+  // ئەو تۆپەی کە لە کانڤاس دەرناچێت بەڵام ناگەڕێتەوە
+  const slow = verdict(base + '١\n  ئەگەر x > ٢٨٠ { x = x }\n  فریم()\n}\n');
+  assert.strictEqual(slow.ok, false);
+  assert.match(slow.reason, /ئاڕاستەکەی بگۆڕێت/);
+  // ئەو تۆپەی لە کانڤاس دەردەچێت
+  const off = verdict(base + '١٠\n  ئەگەر x > ٥٠٠ { x = x }\n  فریم()\n}\n');
+  assert.strictEqual(off.ok, false);
+  assert.match(off.reason, /دەرچوو/);
+  assert.ok(verdict(b.solution).ok);
+});
+
+test('ئەلگۆریتمەکان: ئەنجامە زانستییەکان (کۆلاتز ٢٧ = ١١١، گەڕانی دووانەیی = ٦، GCD)', () => {
+  const { lessons } = require('../docs/lessons.js');
+  const lines = (id) => out(lessons.find((x) => x.id === id).solution).lines;
+  assert.deepStrictEqual(lines('collatz'), ['6: 8', '27: 111']);
+  assert.deepStrictEqual(lines('binary-search'), ['6', '-1']);
+  assert.deepStrictEqual(lines('gcd'), ['6', '1', '25']);
+  assert.deepStrictEqual(lines('bubble-sort'), ['[1, 2, 4, 5, 8]', 'گۆڕین: 6']);
+  assert.deepStrictEqual(lines('time-format'), ['01:02:41', '00:00:05', '10:00:00']);
+});
+
+test('ئەلگۆریتمەکان: mustNotUse ڕێگە نادات بە میتۆدی ئامادەکراو', () => {
+  const { lessons, check } = require('../docs/lessons.js');
+  for (const [id, alt, forbidden] of [
+    ['linear-search', 'کار بگەڕێ(ل، x) { گەڕێنەوە ل.شوێن(x) }\nبۆ i لە ١ تا ١ { }', 'شوێن'],
+    ['bubble-sort', 'نەگۆڕ ل = [٥، ٢]\nل.ڕیزبکە((a، b) => a - b)\nبۆ i لە ١ تا ١ { ئەگەر ڕاست { } }', 'ڕیزبکە'],
+  ]) {
+    const l = lessons.find((x) => x.id === id);
+    const r = out(alt);
+    const c = check(l, r.lines, alt, K, r.gfx);
+    assert.strictEqual(c.ok, false, id);
+    assert.ok(c.reason.includes(forbidden), id);
+  }
 });

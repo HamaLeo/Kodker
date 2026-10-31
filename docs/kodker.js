@@ -375,6 +375,9 @@
       'پەلکەزێڕینە': (h, a) => `hsla(${((num(h) % 360) + 360) % 360},85%,55%,${a === undefined ? 1 : num(a)})`,
       'سینۆس': Math.sin,
       'کۆسینۆس': Math.cos,
+      // ── ئۆبجێکت ──
+      'کلیلەکان': (o) => Object.keys(o),
+      'نرخەکان': (o) => Object.values(o),
       // ── گشتی ──
       'چاپ': (...args) => {
         if (++lines > maxLines) throw new OutputLimit('LIMIT');
@@ -470,6 +473,7 @@
     'پێشەوە': 'forward', 'دواوە': 'back', 'بۆچەپ': 'turn left', 'بۆڕاست': 'turn right', 'ڕووبکەبۆ': 'heading',
     'قەڵەمبەرز': 'pen up', 'قەڵەمدابنێ': 'pen down', 'بچۆبۆ': 'goto', 'فریم': 'next frame', 'خێرایی': 'fps',
     'ڕەنگی': 'rgb', 'پەلکەزێڕینە': 'rainbow hsl', 'سینۆس': 'sin', 'کۆسینۆس': 'cos',
+    'کلیلەکان': 'Object.keys', 'نرخەکان': 'Object.values',
   };
   const CONTROL_INFO = {
     'ئەگەر': 'if', 'هەتا': 'while', 'بۆ': 'for', 'لە': 'for … لە', 'تا': 'for … تا', 'هەنگاو': 'for … هەنگاو', 'هەر': 'for … هەر',
