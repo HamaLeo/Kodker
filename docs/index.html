@@ -48,8 +48,8 @@
         <a class="btn ghost" href="tutorial.html">🎓 فێرکاری هەنگاو بە هەنگاو</a>
       </div>
       <ul class="stats" aria-label="ئامار">
-        <li><b>١١</b><span>وانە</span></li>
-        <li><b>٩</b><span>نموونە</span></li>
+        <li><b>٢٨</b><span>وانە</span></li>
+        <li><b>١٥</b><span>نموونە</span></li>
         <li><b>٠</b><span>پاکێج</span></li>
         <li><b>MIT</b><span>مۆڵەت</span></li>
       </ul>
@@ -74,10 +74,19 @@
           <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
           <button class="tab active" data-tab="output">دەرچوون</button>
           <button class="tab" data-tab="js">JavaScript</button>
+          <button class="tab" data-tab="canvas" id="tab-canvas" hidden>🎨 وێنە</button>
           <span id="status" class="status"></span>
         </div>
         <pre id="output" class="out" dir="rtl"></pre>
         <pre id="js" class="out" dir="ltr" hidden></pre>
+        <div id="canvas-pane" class="cv-pane" hidden>
+          <div class="cv-stage"><canvas id="cv" aria-label="وێنەی کێشراو"></canvas></div>
+          <div class="cv-bar">
+            <button id="cv-replay" title="دووبارە لێبدەوە">↻ دووبارە</button>
+            <button id="cv-save" title="وەک وێنە هەڵیبگرە">⬇ PNG</button>
+            <span id="cv-info" class="cv-info"></span>
+          </div>
+        </div>
       </section>
     </div>
   </main>
@@ -98,7 +107,7 @@
       <article class="feature">
         <span class="ico"><svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></span>
         <h3>فێرکاری ئەنتەراکتیڤ</h3>
-        <p>١١ وانە لە «چاپ» هەتا «پۆل»، هەر یەکە بە ئەرک و پشکنینی خۆکار. پێشکەوتنت هەڵدەگیرێت.</p>
+        <p>٢٨ وانە لە ٥ بەشدا، لە «چاپ» هەتا «ئەنیمەیشن» و پڕۆژەکان. هەر یەکە بە ئەرک و پشکنینی خۆکار، و لە کۆتاییدا بڕوانامە 🏆</p>
       </article>
       <article class="feature">
         <span class="ico"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
@@ -124,6 +133,26 @@
         <pre id="demo-js" dir="ltr"></pre>
       </div>
     </div>
+  </section>
+
+  <section class="wrap section" id="draw">
+    <h2 class="h2">بکێشە! 🎨</h2>
+    <p class="sub">کۆدکەر کانڤاس و قەڵەمی کیسە (Turtle) و ئەنیمەیشنی هەیە. ئەمە ئاڵای کوردستانە، بە کۆدی خوارەوە دەکێشرێت:</p>
+    <div class="showcase draw">
+      <div class="code-card">
+        <div class="code-head"><span>کۆدکەر</span><i class="badge kd">.kd</i></div>
+        <pre id="flag-kd" dir="rtl"></pre>
+      </div>
+      <div class="arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="28" height="28"><path d="M19 12H5M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <small>دەکێشرێت</small>
+      </div>
+      <div class="code-card canvas-card">
+        <div class="code-head"><span>وێنە</span><i class="badge kd">canvas</i></div>
+        <div class="cv-stage"><canvas id="flag-cv" aria-label="ئاڵای کوردستان"></canvas></div>
+      </div>
+    </div>
+    <p class="note"><a href="#playground" data-example="10-flag">▶ لە Playground بیکەرەوە</a> · نموونەکانی تر: قەڵەمی کیسە، ڕەنگاوڕەنگ، ئەنیمەیشن.</p>
   </section>
 
   <section class="wrap section" id="guide">
@@ -155,6 +184,7 @@
   <script src="kodker.js"></script>
   <script src="examples.js"></script>
   <script src="runner.js"></script>
+  <script src="canvas.js"></script>
   <script src="editor.js"></script>
   <script src="app.js"></script>
 </body>

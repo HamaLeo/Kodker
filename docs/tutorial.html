@@ -4,9 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>فێرکاری — کۆدکەر</title>
-  <meta name="description" content="فێربوونی پڕۆگرامینگ بە کوردی، هەنگاو بە هەنگاو. ١١ وانە لە گۆڕاو هەتا پۆل، بە ئەرک و پشکنینی خۆکار.">
+  <meta name="description" content="فێربوونی پڕۆگرامینگ بە کوردی، هەنگاو بە هەنگاو. ٢٨ وانە لە ٥ بەشدا، لە گۆڕاو هەتا کێشان و ئەنیمەیشن، بە ئەرک و پشکنینی خۆکار و بڕوانامە.">
   <meta name="theme-color" content="#0b0f1f">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <meta property="og:title" content="فێرکاری کۆدکەر — ٢٨ وانە بە کوردی">
+  <meta property="og:image" content="https://hamaleo.github.io/kodker/og-image.png">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -29,15 +31,24 @@
   </header>
 
   <div class="wrap tut">
-    <aside class="side">
-      <h2>🎓 فێرکاری</h2>
-      <div class="progress" title="پێشکەوتن"><i id="bar"></i></div>
-      <ol id="list"></ol>
+    <aside class="side" aria-label="لیستی وانەکان">
+      <div class="side-head">
+        <h2>🎓 فێرکاری</h2>
+        <div class="progress" role="progressbar" aria-label="پێشکەوتن" aria-valuemin="0" aria-valuemax="100" id="pbar"><i id="bar"></i></div>
+        <div class="prog-line"><span id="progtxt"></span><b id="progpct"></b></div>
+      </div>
+      <div id="chapters"></div>
+      <div class="side-foot">
+        <button id="cert" class="sun" hidden>🏆 بڕوانامەکەت وەربگرە</button>
+        <button id="reset-progress" class="linklike">↺ سفرکردنەوەی پێشکەوتن</button>
+      </div>
     </aside>
 
     <article class="lesson">
       <div class="intro">
+        <div class="crumb" id="crumb"></div>
         <h2 id="title"></h2>
+        <div class="chips" id="chips"></div>
         <div id="body"></div>
         <p class="task" id="task"></p>
       </div>
@@ -54,6 +65,13 @@
         <section class="pane">
           <div class="bar"><b>دەرچوون</b><span id="status" class="status"></span></div>
           <pre id="output" class="out" dir="rtl"></pre>
+          <div id="canvas-pane" class="cv-pane" hidden>
+            <div class="cv-stage"><canvas id="cv" aria-label="وێنەی کێشراو"></canvas></div>
+            <div class="cv-bar">
+              <button id="cv-replay">↻ دووبارە</button>
+              <span id="cv-info" class="cv-info"></span>
+            </div>
+          </div>
         </section>
       </div>
 
@@ -69,6 +87,20 @@
     </article>
   </div>
 
+  <dialog id="certdlg" class="certdlg">
+    <form method="dialog" class="cert-form">
+      <h3>🏆 پیرۆزە! بڕوانامەکەت</h3>
+      <label>ناوەکەت بنووسە:
+        <input id="cert-name" type="text" maxlength="40" placeholder="ناوی تەواو" autocomplete="name">
+      </label>
+      <canvas id="cert-cv" aria-label="پێشبینینی بڕوانامە"></canvas>
+      <div class="cert-actions">
+        <button id="cert-save" class="sun" type="button">⬇ دابەزاندنی وێنە (PNG)</button>
+        <button value="close">داخستن</button>
+      </div>
+    </form>
+  </dialog>
+
   <footer class="site-foot">
     <p class="copy"><a href="index.html">گەڕانەوە بۆ Playground</a> · <a href="https://github.com/HamaLeo/kodker" target="_blank" rel="noopener">سەرچاوە لە GitHub</a> · دروستکراوە بە ❤️ بۆ کۆمەڵگەی کورد</p>
   </footer>
@@ -76,7 +108,9 @@
   <script src="kodker.js"></script>
   <script src="lessons.js"></script>
   <script src="runner.js"></script>
+  <script src="canvas.js"></script>
   <script src="editor.js"></script>
+  <script src="certificate.js"></script>
   <script src="tutorial.js"></script>
 </body>
 </html>

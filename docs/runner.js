@@ -23,7 +23,7 @@
     }
     function mainThread() {
       const r = Kodker.run(src, { print: cb.out });
-      end({ ok: r.ok, js: r.js, error: r.error, timedOut: false });
+      end({ ok: r.ok, js: r.js, error: r.error, gfx: r.gfx, timedOut: false });
     }
 
     try {
@@ -35,11 +35,11 @@
     worker.onmessage = (ev) => {
       const d = ev.data;
       if (d.type === 'out') { if (!finished) cb.out(d.text); }
-      else if (d.type === 'done') end({ ok: d.ok, js: d.js, error: d.error, timedOut: false });
+      else if (d.type === 'done') end({ ok: d.ok, js: d.js, error: d.error, gfx: d.gfx, timedOut: false });
     };
     worker.onerror = () => { stop(); if (!finished) mainThread(); };
     timer = setTimeout(() => {
-      end({ ok: false, js: null, timedOut: true,
+      end({ ok: false, js: null, gfx: null, timedOut: true,
         error: 'کۆدەکەت زیاتر لە ٥ چرکەی خایاند و وەستێنرا. لەوانەیە بازنەی بێکۆتایی هەبێت.' });
     }, TIMEOUT_MS);
     worker.postMessage(src);

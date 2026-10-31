@@ -271,11 +271,111 @@
     return '{ ' + keys.map((k) => k + ': ' + format(v[k], true, depth + 1)).join(', ') + ' }';
   }
 
+
+  // ───────────────────────── کێشان (Canvas) ─────────────────────────
+  // فەرمانەکانی کێشان لە کاتی جێبەجێکردندا تۆمار دەکرێن (نەک ڕاستەوخۆ دەکێشرێن)، بۆ ئەوەی
+  // لە Web Worker کار بکەن و لە وێبگەڕدا لێیاندرێتەوە (docs/canvas.js).
+  const COLOR_NAMES = {
+    'سوور': '#ed2024', 'سەوز': '#278e43', 'شین': '#2563eb', 'زەرد': '#febd11', 'نارنجی': '#ff8420',
+    'وەنەوشەیی': '#8b5cf6', 'پەمەیی': '#ec4899', 'ڕەش': '#111111', 'سپی': '#ffffff',
+    'خۆڵەمێشی': '#9ca3af', 'قاوەیی': '#92400e', 'ئاسمانی': '#38bdf8',
+  };
+  const GFX_MAX_COMMANDS = 200000;
+  const GFX_MAX_FRAMES = 3000;
+
+  class GfxLimit extends Error {}
+
+  function createGfx() {
+    const g = {
+      width: 500, height: 400, fps: 30, bg: '#ffffff', drawn: false, count: 0,
+      frames: [[]], x: 250, y: 200, heading: 0, pen: true,
+    };
+    g.push = (cmd) => {
+      if (++g.count > GFX_MAX_COMMANDS) throw new GfxLimit('LIMIT');
+      g.frames[g.frames.length - 1].push(cmd);
+      g.drawn = true;
+    };
+    g.result = () => {
+      if (!g.drawn) return null;
+      const frames = g.frames.slice();
+      while (frames.length > 1 && frames[frames.length - 1].length === 0) frames.pop();
+      return { width: g.width, height: g.height, fps: g.fps, frames };
+    };
+    return g;
+  }
+
   class OutputLimit extends Error {}
 
-  function createBuiltins(print, maxLines) {
+  function createBuiltins(print, maxLines, gx) {
     let lines = 0;
+    gx = gx || createGfx();
+    const num = (v) => {
+      const n = Number(v);
+      if (v === null || v === undefined || v === '' || !Number.isFinite(n)) {
+        throw new TypeError('لە کێشاندا ژمارەیەک پێویستە، بەڵام «' + format(v, true) + '» وەرگیرا.');
+      }
+      return n;
+    };
+    const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+    const color = (c) => {
+      if (typeof c !== 'string') throw new TypeError('ڕەنگ دەبێت دەق بێت، بۆ نموونە "سوور" یان "#ff0000". وەرگیرا: «' + format(c, true) + '»');
+      return COLOR_NAMES[normalizeWord(c.trim())] || c;
+    };
+    const move = (d) => {
+      const r = (gx.heading * Math.PI) / 180;
+      const nx = gx.x + d * Math.sin(r);
+      const ny = gx.y - d * Math.cos(r);
+      if (gx.pen) gx.push(['line', gx.x, gx.y, nx, ny]);
+      gx.x = nx; gx.y = ny;
+    };
+    const shape = (op, mode, ...a) => gx.push([op, ...a.map(num), mode]);
     return {
+      // ── کێشان ──
+      'قەبارە': (w, h) => {
+        gx.width = clamp(num(w), 50, 1200); gx.height = clamp(num(h), 50, 1200);
+        gx.x = gx.width / 2; gx.y = gx.height / 2; gx.heading = 0; gx.drawn = true;
+      },
+      'پاشبنەمابکە': (c) => { gx.bg = color(c); gx.push(['bg', gx.bg]); },
+      'پاککەرەوە': () => gx.push(['bg', gx.bg]),
+      'ڕەنگبکە': (c) => gx.push(['fill', color(c)]),
+      'هێڵڕەنگبکە': (c) => gx.push(['stroke', color(c)]),
+      'ئەستووریبکە': (n) => gx.push(['lw', num(n)]),
+      'لاکێش': (x, y, w, h) => shape('rect', 'f', x, y, w, h),
+      'لاکێشەهێڵ': (x, y, w, h) => shape('rect', 's', x, y, w, h),
+      'بازنە': (x, y, r) => shape('circle', 'f', x, y, r),
+      'بازنەهێڵ': (x, y, r) => shape('circle', 's', x, y, r),
+      'هێڵ': (a, b, c, d) => gx.push(['line', num(a), num(b), num(c), num(d)]),
+      'سێگۆشە': (a, b, c, d, e, f) => shape('tri', 'f', a, b, c, d, e, f),
+      'سێگۆشەهێڵ': (a, b, c, d, e, f) => shape('tri', 's', a, b, c, d, e, f),
+      'ئەستێرە': (x, y, r, n) => gx.push(['star', num(x), num(y), num(r), n === undefined ? 5 : clamp(Math.round(num(n)), 3, 60), 'f']),
+      'ئەستێرەهێڵ': (x, y, r, n) => gx.push(['star', num(x), num(y), num(r), n === undefined ? 5 : clamp(Math.round(num(n)), 3, 60), 's']),
+      'خۆر': (x, y, r) => gx.push(['sun', num(x), num(y), num(r)]),
+      'نووسین': (t, x, y, size) => gx.push(['text', String(t), num(x), num(y), size === undefined ? 24 : num(size)]),
+      // ── قەڵەمی کیسە (Turtle) ──
+      'پێشەوە': (n) => move(num(n)),
+      'دواوە': (n) => move(-num(n)),
+      'بۆچەپ': (d) => { gx.heading -= num(d); },
+      'بۆڕاست': (d) => { gx.heading += num(d); },
+      'ڕووبکەبۆ': (d) => { gx.heading = num(d); },
+      'قەڵەمبەرز': () => { gx.pen = false; },
+      'قەڵەمدابنێ': () => { gx.pen = true; },
+      'بچۆبۆ': (x, y) => {
+        x = num(x); y = num(y);
+        if (gx.pen) gx.push(['line', gx.x, gx.y, x, y]);
+        gx.x = x; gx.y = y;
+      },
+      // ── ئەنیمەیشن ──
+      'فریم': () => {
+        if (gx.frames.length >= GFX_MAX_FRAMES) throw new GfxLimit('LIMIT');
+        gx.frames.push([]); gx.drawn = true;
+      },
+      'خێرایی': (n) => { gx.fps = clamp(num(n), 1, 60); },
+      // ── ڕەنگ و بیرکاری ──
+      'ڕەنگی': (r, g, b, a) => (a === undefined ? `rgb(${num(r)},${num(g)},${num(b)})` : `rgba(${num(r)},${num(g)},${num(b)},${num(a)})`),
+      'پەلکەزێڕینە': (h, a) => `hsla(${((num(h) % 360) + 360) % 360},85%,55%,${a === undefined ? 1 : num(a)})`,
+      'سینۆس': Math.sin,
+      'کۆسینۆس': Math.cos,
+      // ── گشتی ──
       'چاپ': (...args) => {
         if (++lines > maxLines) throw new OutputLimit('LIMIT');
         print(args.map((a) => format(a)).join(' '));
@@ -300,6 +400,7 @@
 
   function explainError(e) {
     if (e instanceof KodkerError) return e.message;
+    if (e instanceof GfxLimit) return 'کێشانەکە زۆر گەورە بوو (زیاتر لە ٢٠٠ هەزار فەرمان یان ٣٠٠٠ فریم) و وەستێنرا.';
     if (e instanceof OutputLimit) return 'دەرچوونەکە زۆر درێژ بوو و وەستێنرا (زیاتر لە ٥٠٠٠ ڕیز).';
     const msg = String((e && e.message) || e);
     let m;
@@ -362,6 +463,13 @@
     'چاپ': 'console.log', 'هەڕەمەکی': 'random', 'بکەژمارە': 'Number', 'بکەدەق': 'String',
     'ڕەگ': 'sqrt', 'توان': 'pow', 'خوارکە': 'floor', 'سەرکە': 'ceil', 'گردبکە': 'round',
     'ڕەها': 'abs', 'گەورەترین': 'max', 'بچووکترین': 'min', 'پای': 'π',
+    'قەبارە': 'canvas size', 'پاشبنەمابکە': 'background', 'پاککەرەوە': 'clear', 'ڕەنگبکە': 'fill color',
+    'هێڵڕەنگبکە': 'stroke color', 'ئەستووریبکە': 'line width', 'لاکێش': 'fillRect', 'لاکێشەهێڵ': 'strokeRect',
+    'بازنە': 'circle', 'بازنەهێڵ': 'circle outline', 'هێڵ': 'line', 'سێگۆشە': 'triangle', 'سێگۆشەهێڵ': 'triangle outline',
+    'ئەستێرە': 'star', 'ئەستێرەهێڵ': 'star outline', 'خۆر': 'sun ☀', 'نووسین': 'text',
+    'پێشەوە': 'forward', 'دواوە': 'back', 'بۆچەپ': 'turn left', 'بۆڕاست': 'turn right', 'ڕووبکەبۆ': 'heading',
+    'قەڵەمبەرز': 'pen up', 'قەڵەمدابنێ': 'pen down', 'بچۆبۆ': 'goto', 'فریم': 'next frame', 'خێرایی': 'fps',
+    'ڕەنگی': 'rgb', 'پەلکەزێڕینە': 'rainbow hsl', 'سینۆس': 'sin', 'کۆسینۆس': 'cos',
   };
   const CONTROL_INFO = {
     'ئەگەر': 'if', 'هەتا': 'while', 'بۆ': 'for', 'لە': 'for … لە', 'تا': 'for … تا', 'هەنگاو': 'for … هەنگاو', 'هەر': 'for … هەر',
@@ -453,7 +561,7 @@
 
   /**
    * کۆدی کوردی جێبەجێ دەکات.
-   * @returns {{ok: boolean, js: string|null, error: string|null}}
+   * @returns {{ok: boolean, js: string|null, error: string|null, gfx: object|null}}
    */
   function run(source, opts) {
     opts = opts || {};
@@ -462,18 +570,19 @@
     try {
       js = transpile(source);
     } catch (e) {
-      return { ok: false, js: null, error: explainError(e) };
+      return { ok: false, js: null, error: explainError(e), gfx: null };
     }
-    const env = createBuiltins(print, opts.maxLines || 5000);
+    const gx = createGfx();
+    const env = createBuiltins(print, opts.maxLines || 5000, gx);
     const names = Object.keys(env);
     try {
       // کۆدەکە لە ناو فەنکشنێکی ناوەکیدایە تا بتوانرێت ناوی فەنکشنە ئامادەکراوەکان دووبارە بەکاربهێنرێنەوە
       const fn = new Function(...names, '"use strict";\nreturn (function () {\n' + js + '\n})();');
       fn(...names.map((k) => env[k]));
     } catch (e) {
-      return { ok: false, js, error: explainError(e) };
+      return { ok: false, js, error: explainError(e), gfx: gx.result() };
     }
-    return { ok: true, js, error: null };
+    return { ok: true, js, error: null, gfx: gx.result() };
   }
 
   return { transpile, tokenize, highlight, completions, run, format, KEYWORDS, PROPS, KodkerError, VERSION: '0.1.0' };

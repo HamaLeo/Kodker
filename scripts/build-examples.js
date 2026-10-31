@@ -12,6 +12,12 @@ const titles = {
   '07-class': 'پۆل',
   '08-guess': 'گریمانەی ژمارە',
   '09-errors': 'مامەڵە لەگەڵ هەڵە',
+  '10-flag': '🎨 ئاڵای کوردستان',
+  '11-spiral': '🎨 سپیرالی ڕەنگاوڕەنگ',
+  '12-flower': '🎨 گوڵ',
+  '13-tree': '🎨 درەخت (Recursion)',
+  '14-ball': '🎨 ئەنیمەیشن: تۆپ',
+  '15-night': '🎨 ئاسمانی شەو',
 };
 
 const dir = path.join(__dirname, '..', 'examples');
