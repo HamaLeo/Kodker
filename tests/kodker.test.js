@@ -156,7 +156,7 @@ test('هایلایت: ناوی کار و میتۆد', () => {
 
 test('وانەکان: وەڵامی هەر وانەیەک دەبێت تێپەڕێت', () => {
   const { lessons, check } = require('../docs/lessons.js');
-  assert.ok(lessons.length >= 81);
+  assert.ok(lessons.length >= 98);
   for (const [i, l] of lessons.entries()) {
     const r = out(l.solution);
     assert.ok(r.ok, `وانە ${i + 1}: ${r.error}`);
@@ -480,4 +480,29 @@ test('ئەلگۆریتمەکان: mustNotUse ڕێگە نادات بە میتۆد
     assert.strictEqual(c.ok, false, id);
     assert.ok(c.reason.includes(forbidden), id);
   }
+});
+
+test('مەشقەکان: ئەنجامە زانراوەکانی بیرکاری (Euler، ژمارەی تەواو، ئارمسترۆنگ، دابەشکەرە سەرەتاییەکان)', () => {
+  const { lessons } = require('../docs/lessons.js');
+  const lines = (id) => out(lessons.find((x) => x.id === id).solution).lines;
+  assert.deepStrictEqual(lines('euler1'), ['233168']);                         // Project Euler #1
+  assert.deepStrictEqual(lines('euler2'), ['4613732']);                        // Project Euler #2
+  assert.deepStrictEqual(lines('perfect-numbers'), ['[6, 28, 496]']);        // ژمارە تەواوەکان
+  assert.deepStrictEqual(lines('armstrong'), ['[1, 2, 3, 4, 5, 6, 7, 8, 9, 153, 370, 371, 407]']);
+  assert.deepStrictEqual(lines('prime-factors'), ['[2, 2, 2, 3, 3, 5]', '[2, 2, 3, 7]', '[97]']);
+  assert.deepStrictEqual(lines('caesar'), ['khoor', 'hello', 'b c']);          // قەیسەر: شیفت ٣ ثم ٢٣
+  assert.deepStrictEqual(lines('rle'), ['a3b2c1', 'z4', 'a1b1c1']);
+  assert.deepStrictEqual(lines('leap-year'), ['2024: ڕاست', '1900: هەڵە', '2000: ڕاست', '2023: هەڵە']);
+  assert.deepStrictEqual(lines('digit-sum'), ['15', '27', '7']);
+  assert.deepStrictEqual(lines('reverse-number'), ['54321', '21', '7']);
+});
+
+test('مەشقەکان: وەڵامی بیرکاری ڕێگە نادات بە میتۆدی دەق (mustNotUse)', () => {
+  const { lessons, check } = require('../docs/lessons.js');
+  const viaString = 'کار کۆیژمارەکان(n) {\n  گۆڕاو کۆ = ٠\n  بۆ هەر ر لە بکەدەق(n).دابەشبکە("") { کۆ += بکەژمارە(ر) }\n  گەڕێنەوە کۆ\n}\nهەتا ٠ > ١ { خوارکە(١) }\nچاپ(کۆیژمارەکان(١٢٣٤٥))\nچاپ(کۆیژمارەکان(٩٩٩))\nچاپ(کۆیژمارەکان(٧))\n';
+  const l = lessons.find((x) => x.id === 'digit-sum');
+  const r = out(viaString);
+  const c = check(l, r.lines, viaString, K, r.gfx);
+  assert.strictEqual(c.ok, false);
+  assert.match(c.reason, /دابەشبکە/);
 });
