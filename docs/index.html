@@ -7,6 +7,8 @@
   <meta name="description" content="کۆدکەر زمانێکی پڕۆگرامینگی کراوەیە بە سینتاکسی کوردی. لە وێبگەڕەکەت کۆد بنووسە و جێبەجێی بکە، بێ دابەزاندن.">
   <meta name="theme-color" content="#0b0f1f">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <meta property="og:type" content="website">
   <meta property="og:title" content="کۆدکەر — پڕۆگرامینگ بە زمانی کوردی">
   <meta property="og:description" content="کۆد بنووسە بە زمانی دایکت. ئەگەر، بۆ، چاپ ... بۆ JavaScript دەگۆڕدرێت.">
@@ -47,11 +49,12 @@
       <p class="lead">سینتاکسی کوردی کە دەگۆڕدرێت بۆ JavaScript. لە وێبگەڕەکەتدا بنووسە، جێبەجێی بکە و فێربە، بێ دابەزاندن و بێ هیچ ڕێکخستنێک.</p>
       <div class="cta-row">
         <a class="btn sun" href="#playground">▶ دەستپێبکە</a>
+        <a class="btn ghost" href="#gallery">🎮 یاری و نموونە</a>
         <a class="btn ghost" href="tutorial.html">🎓 فێرکاری هەنگاو بە هەنگاو</a>
       </div>
       <ul class="stats" aria-label="ئامار">
-        <li><b>١١٥</b><span>وانە</span></li>
-        <li><b>١٥</b><span>نموونە</span></li>
+        <li><b>١٢٢</b><span>وانە</span></li>
+        <li><b>٢٣</b><span>نموونە و یاری</span></li>
         <li><b>٠</b><span>پاکێج</span></li>
         <li><b>MIT</b><span>مۆڵەت</span></li>
       </ul>
@@ -84,8 +87,10 @@
         <div id="canvas-pane" class="cv-pane" hidden>
           <div class="cv-stage"><canvas id="cv" aria-label="وێنەی کێشراو"></canvas></div>
           <div class="cv-bar">
+            <button id="cv-stop" class="stop" hidden title="یارییەکە بوەستێنە">⏹ بوەستە</button>
             <button id="cv-replay" title="دووبارە لێبدەوە">↻ دووبارە</button>
             <button id="cv-save" title="وەک وێنە هەڵیبگرە">⬇ PNG</button>
+            <span id="cv-hint" class="cv-hint" hidden>🎮 کلیک لەسەر وێنەکە بکە، پاشان کیبۆرد یان ماوس بەکاربهێنە</span>
             <span id="cv-info" class="cv-info"></span>
           </div>
         </div>
@@ -109,7 +114,7 @@
       <article class="feature">
         <span class="ico"><svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></span>
         <h3>فێرکاری ئەنتەراکتیڤ</h3>
-        <p>١١٥ وانە لە ٨ بەشدا، لە «چاپ» هەتا «ئەنیمەیشن» و پڕۆژەکان. هەر یەکە بە ئەرک و پشکنینی خۆکار، و لە کۆتاییدا بڕوانامە 🏆</p>
+        <p>١٢٢ وانە لە ٩ بەشدا، لە «چاپ» هەتا «ئەنیمەیشن» و پڕۆژەکان. هەر یەکە بە ئەرک و پشکنینی خۆکار، و لە کۆتاییدا بڕوانامە 🏆</p>
       </article>
       <article class="feature">
         <span class="ico"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
@@ -157,6 +162,17 @@
     <p class="note"><a href="#playground" data-example="10-flag">▶ لە Playground بیکەرەوە</a> · نموونەکانی تر: قەڵەمی کیسە، ڕەنگاوڕەنگ، ئەنیمەیشن.</p>
   </section>
 
+  <section class="wrap section" id="gallery">
+    <h2 class="h2">گەلەری نموونە ✨</h2>
+    <p class="sub">یاری، هونەر و ئەنیمەیشن — هەموو بە کۆدکەر نووسراون. کلیک بکە بۆ ئەوەی لە Playground بیکەیتەوە و پاشان کۆدەکەی بگۆڕە.</p>
+    <div class="chips" role="tablist" aria-label="فلتەر">
+      <button class="chip on" data-f="all">هەموو</button>
+      <button class="chip" data-f="game">🎮 یاری</button>
+      <button class="chip" data-f="art">🎨 گرافیک</button>
+    </div>
+    <div class="gallery" id="gallery-grid"></div>
+  </section>
+
   <section class="wrap section" id="guide">
     <h2 class="h2">ڕێنمایی خێرا</h2>
     <div class="cards" id="cards"></div>
@@ -187,7 +203,9 @@
   <script src="examples.js"></script>
   <script src="runner.js"></script>
   <script src="canvas.js"></script>
+  <script src="game.js"></script>
   <script src="editor.js"></script>
   <script src="app.js"></script>
+  <script>if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(function () {});</script>
 </body>
 </html>

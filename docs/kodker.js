@@ -294,6 +294,8 @@
     const g = {
       width: 500, height: 400, fps: 30, bg: '#ffffff', drawn: false, count: 0,
       frames: [[]], x: 250, y: 200, heading: 0, pen: true,
+      loop: null, fpsSet: false,
+      input: { keys: {}, mx: -1, my: -1, down: false, clicked: false },
     };
     g.push = (cmd) => {
       if (++g.count > GFX_MAX_COMMANDS) throw new GfxLimit('LIMIT');
@@ -374,7 +376,20 @@
         if (gx.frames.length >= GFX_MAX_FRAMES) throw new GfxLimit('LIMIT');
         gx.frames.push([]); gx.drawn = true;
       },
-      'خێرایی': (n) => { gx.fps = clamp(num(n), 1, 60); },
+      'خێرایی': (n) => { gx.fps = clamp(num(n), 1, 60); gx.fpsSet = true; },
+      // ── یاری (بازنەی ٦٠ فریم + ئینپووت) ──
+      'یاریبکە': (fn) => {
+        if (typeof fn !== 'function') throw new TypeError('«یاریبکە» کارێکی دەوێت: یاریبکە(() => { ... })');
+        gx.loop = fn; gx.drawn = true;
+      },
+      'کلیل': (name) => gx.input.keys[normalizeWord(String(name).trim()).toLowerCase()] === true,
+      'ماوسX': () => gx.input.mx,
+      'ماوسY': () => gx.input.my,
+      'ماوسگیراوە': () => !!gx.input.down,
+      'کلیککراوە': () => !!gx.input.clicked,
+      'دووری': (x1, y1, x2, y2) => Math.hypot(num(x2) - num(x1), num(y2) - num(y1)),
+      'سنوور': (x, a, b) => clamp(num(x), num(a), num(b)),
+      'ئێستا': () => { const d = new Date(); return { سەعات: d.getHours(), خولەک: d.getMinutes(), چرکە: d.getSeconds(), میلیچرکە: d.getMilliseconds() }; },
       // ── ڕەنگ و بیرکاری ──
       'ڕەنگی': (r, g, b, a) => (a === undefined ? `rgb(${num(r)},${num(g)},${num(b)})` : `rgba(${num(r)},${num(g)},${num(b)},${num(a)})`),
       'پەلکەزێڕینە': (h, a) => `hsla(${((num(h) % 360) + 360) % 360},85%,55%,${a === undefined ? 1 : num(a)})`,
@@ -479,6 +494,7 @@
     'قەڵەمبەرز': 'pen up', 'قەڵەمدابنێ': 'pen down', 'بچۆبۆ': 'goto', 'فریم': 'next frame', 'خێرایی': 'fps',
     'ڕەنگی': 'rgb', 'پەلکەزێڕینە': 'rainbow hsl', 'سینۆس': 'sin', 'کۆسینۆس': 'cos',
     'کلیلەکان': 'Object.keys', 'نرخەکان': 'Object.values',
+    'یاریبکە': 'game loop 🎮', 'کلیل': 'key down', 'ماوسX': 'mouse x', 'ماوسY': 'mouse y', 'ماوسگیراوە': 'mouse down', 'کلیککراوە': 'clicked', 'دووری': 'distance', 'سنوور': 'clamp', 'ئێستا': 'now',
   };
   const CONTROL_INFO = {
     'ئەگەر': 'if', 'هەتا': 'while', 'بۆ': 'for', 'لە': 'for … لە', 'تا': 'for … تا', 'هەنگاو': 'for … هەنگاو', 'هەر': 'for … هەر',
@@ -570,7 +586,7 @@
 
   /**
    * کۆدی کوردی جێبەجێ دەکات.
-   * @returns {{ok: boolean, js: string|null, error: string|null, gfx: object|null}}
+   * @returns {{ok: boolean, js: string|null, error: string|null, gfx: object|null, game: object|null}}
    */
   function run(source, opts) {
     opts = opts || {};
@@ -591,7 +607,23 @@
     } catch (e) {
       return { ok: false, js, error: explainError(e), gfx: gx.result() };
     }
-    return { ok: true, js, error: null, gfx: gx.result() };
+    // ئەگەر کۆدەکە «یاریبکە(...)»ی بانگ کرد، session ێکی یاری دەگەڕێنین: هەر tick یەک فریم جێبەجێ دەکات
+    const game = gx.loop ? {
+      get fps() { return gx.fpsSet ? gx.fps : 60; },
+      tick(input) {
+        input = input || {};
+        gx.input = {
+          keys: input.keys || {},
+          mx: typeof input.mx === 'number' ? input.mx : -1,
+          my: typeof input.my === 'number' ? input.my : -1,
+          down: !!input.down, clicked: !!input.clicked,
+        };
+        gx.frames = [[]]; gx.count = 0;
+        try { gx.loop(); } catch (e) { return { ok: false, error: explainError(e), cmds: gx.frames.flat() }; }
+        return { ok: true, error: null, cmds: gx.frames.flat() };
+      },
+    } : null;
+    return { ok: true, js, error: null, gfx: gx.result(), game };
   }
 
   return { transpile, tokenize, highlight, completions, run, format, KEYWORDS, PROPS, KodkerError, VERSION: '0.1.0' };

@@ -4,10 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>فێرکاری — کۆدکەر</title>
-  <meta name="description" content="فێربوونی پڕۆگرامینگ بە کوردی، هەنگاو بە هەنگاو. ١١٥ وانە لە ٨ بەشدا، لە گۆڕاو هەتا کێشان و ئەنیمەیشن، بە ئەرک و پشکنینی خۆکار و بڕوانامە.">
+  <meta name="description" content="فێربوونی پڕۆگرامینگ بە کوردی، هەنگاو بە هەنگاو. ١٢٢ وانە لە ٩ بەشدا، لە گۆڕاو هەتا کێشان و ئەنیمەیشن، بە ئەرک و پشکنینی خۆکار و بڕوانامە.">
   <meta name="theme-color" content="#0b0f1f">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <meta property="og:title" content="فێرکاری کۆدکەر — ١١٥ وانە بە کوردی">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta property="og:title" content="فێرکاری کۆدکەر — ١٢٢ وانە بە کوردی">
   <meta property="og:image" content="https://hamaleo.github.io/kodker/og-image.png">
   <link rel="preload" href="fonts/vazirmatn-arabic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/vazirmatn-arabic-800-normal.woff2" as="font" type="font/woff2" crossorigin>
@@ -70,7 +72,9 @@
           <div id="canvas-pane" class="cv-pane" hidden>
             <div class="cv-stage"><canvas id="cv" aria-label="وێنەی کێشراو"></canvas></div>
             <div class="cv-bar">
+              <button id="cv-stop" class="stop" hidden>⏹ بوەستە</button>
               <button id="cv-replay">↻ دووبارە</button>
+              <span id="cv-hint" class="cv-hint" hidden>🎮 کلیک لەسەر وێنەکە بکە، پاشان کیبۆرد یان ماوس بەکاربهێنە</span>
               <span id="cv-info" class="cv-info"></span>
             </div>
           </div>
@@ -111,8 +115,10 @@
   <script src="lessons.js"></script>
   <script src="runner.js"></script>
   <script src="canvas.js"></script>
+  <script src="game.js"></script>
   <script src="editor.js"></script>
   <script src="certificate.js"></script>
   <script src="tutorial.js"></script>
+  <script>if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(function () {});</script>
 </body>
 </html>

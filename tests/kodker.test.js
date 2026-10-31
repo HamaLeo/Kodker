@@ -155,16 +155,16 @@ test('هایلایت: ناوی کار و میتۆد', () => {
 });
 
 test('وانەکان: وەڵامی هەر وانەیەک دەبێت تێپەڕێت', () => {
-  const { lessons, check } = require('../docs/lessons.js');
+  const { lessons, check, simulateSync } = require('../docs/lessons.js');
   assert.ok(lessons.length >= 115);
   for (const [i, l] of lessons.entries()) {
     const r = out(l.solution);
     assert.ok(r.ok, `وانە ${i + 1}: ${r.error}`);
-    const c = check(l, r.lines, l.solution, K, r.gfx);
+    const c = check(l, r.lines, l.solution, K, r.gfx, l.game ? simulateSync(l, l.solution, K) : undefined);
     assert.ok(c.ok, `وانە ${i + 1} (${l.title}): ${c.reason} ${JSON.stringify(c.got)}`);
     // کۆدی دەستپێک نابێت خۆی بەخۆی تێپەڕێت
     const s = out(l.starter);
-    assert.ok(!check(l, s.lines, l.starter, K, s.gfx).ok, `وانە ${i + 1}: کۆدی دەستپێک پێشتر وەڵامە`);
+    assert.ok(!check(l, s.lines, l.starter, K, s.gfx, l.game ? simulateSync(l, l.starter, K) : undefined).ok, `وانە ${i + 1}: کۆدی دەستپێک پێشتر وەڵامە`);
   }
 });
 
@@ -342,7 +342,7 @@ test('وانەکان: پێکهاتە (id ی یەکتا، بەش، کات، ئا�
     assert.ok(LEVELS[l.level], `${l.id}: ئاست`);
     assert.ok(Array.isArray(l.recap) && l.recap.length >= 2, `${l.id}: «بیرت بێت» کەمە`);
     assert.ok(l.hint && l.solution && l.task && l.body && l.starter, `${l.id}: بەشێک کەمە`);
-    assert.ok(l.expect || l.expectDraw || l.expectAny || l.minFrames || l.verify, `${l.id}: پشکنینی نییە`);
+    assert.ok(l.expect || l.expectDraw || l.expectAny || l.minFrames || l.verify || l.verifyGame, `${l.id}: پشکنینی نییە`);
   }
   // هەر بەشێک لانیکەم یەک وانەی هەیە، و وانەکان بە ڕیزی بەشەکان دانراون
   const order = chapters.map((c) => c.id);
@@ -579,4 +579,57 @@ test('فۆنت: فایلی فۆنتی سپێدە (مۆڵەتی تایبەت، ب
   const bad = walk(path.join(__dirname, '..')).filter((f) => /speda/i.test(path.basename(f)) && /\.(ttf|otf|woff2?|eot)$/i.test(f));
   assert.deepStrictEqual(bad, [], 'فۆنتی سپێدە نابێت بڵاو بکرێتەوە: ' + bad.join(', '));
   assert.ok(!fs.readFileSync(path.join(__dirname, '..', 'docs', 'style.css'), 'utf8').match(/url\([^)]*speda/i));
+});
+
+// ── یاری (game engine) ──
+test('یاریبکە: session ی یاری و ئینپوت', () => {
+  const r = K.run('قەبارە(٢٠٠، ١٠٠)\nگۆڕاو x = ١٠\nیاریبکە(() => {\n  ئەگەر کلیل("ڕاست") { x += ٥ }\n  بازنە(x، ٥٠، ٥)\n})', { print() {} });
+  assert.ok(r.ok && r.game);
+  assert.strictEqual(r.game.fps, 60);
+  const at = (keys) => { const t = r.game.tick({ keys, mx: -1, my: -1, down: false, clicked: false }); assert.ok(t.ok); return t.cmds.find((c) => c[0] === 'circle')[1]; };
+  assert.strictEqual(at({}), 10);
+  assert.strictEqual(at({ 'ڕاست': true }), 15);
+  assert.strictEqual(at({ 'ڕاست': true }), 20);
+  assert.strictEqual(at({}), 20);
+});
+
+test('یاریبکە: ماوس، دووری، سنوور و ئێستا', () => {
+  const lines = [];
+  const r2 = K.run('یاریبکە(() => { چاپ(ماوسX()، ماوسY()، ماوسگیراوە()، کلیککراوە()، دووری(٠، ٠، ٣، ٤)، سنوور(٩٩، ٠، ١٠)) })', { print: (t) => lines.push(t) });
+  r2.game.tick({ keys: {}, mx: 7, my: 8, down: true, clicked: true });
+  assert.strictEqual(lines[0], '7 8 ڕاست ڕاست 5 10');
+  const t = K.run('چاپ(ئێستا().سەعات >= ٠)', { print: (x) => lines.push(x) });
+  assert.ok(t.ok && !t.game);
+  assert.strictEqual(lines[1], 'ڕاست');
+});
+
+test('یاریبکە: هەڵەی ناو فریم ڕاپۆرت دەکرێت و یاریبکە بێ کار هەڵەیە', () => {
+  const r = K.run('یاریبکە(() => { چاپ(نەبوو) })', { print() {} });
+  const t = r.game.tick({ keys: {} });
+  assert.strictEqual(t.ok, false);
+  assert.ok(/پێناسە نەکراوە/.test(t.error));
+  assert.strictEqual(K.run('یاریبکە(٥)', { print() {} }).ok, false);
+});
+
+test('نموونەی یارییەکان: هەموو فریمەکان بێ هەڵە کار دەکەن لەگەڵ هەموو جۆرە ئینپوتێک', () => {
+  const dir = path.join(__dirname, '..', 'examples');
+  const games = fs.readdirSync(dir).filter((f) => /^(16|17|18|19|20|21|23)-/.test(f));
+  assert.ok(games.length >= 7);
+  for (const f of games) {
+    const r = K.run(fs.readFileSync(path.join(dir, f), 'utf8'), { print() {} });
+    assert.ok(r.ok && r.game, f + ': ' + r.error);
+    for (let i = 0; i < 400; i++) {
+      const keys = i % 90 < 30 ? { 'ڕاست': true, 'بۆشایی': i % 7 === 0 } : i % 90 < 60 ? { 'چەپ': true } : { 'سەرەوە': true, 'خوارەوە': i % 2 === 0 };
+      const t = r.game.tick({ keys, mx: (i * 7) % 400, my: (i * 5) % 300, down: i % 50 < 10, clicked: i % 97 === 0 });
+      assert.ok(t.ok, `${f} فریم ${i}: ${t.error}`);
+    }
+  }
+});
+
+test('گەلەری نموونە: هەر نموونەیەک گرووپ و ناونیشانی هەیە', () => {
+  const src = fs.readFileSync(path.join(__dirname, '..', 'docs', 'examples.js'), 'utf8');
+  const ex = JSON.parse(src.slice(src.indexOf('['), src.lastIndexOf(']') + 1));
+  assert.ok(ex.length >= 23);
+  assert.ok(ex.filter((e) => e.group === 'game').length >= 4);
+  for (const e of ex) { assert.ok(['code', 'art', 'game'].includes(e.group), e.id); assert.ok(e.title && e.code, e.id); }
 });

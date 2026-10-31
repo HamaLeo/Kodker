@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   const $ = (id) => document.getElementById(id);
-  const { lessons, chapters, check, legacyToIds, LEGACY_ORDER, LEVELS } = KodkerLessons;
+  const { lessons, chapters, check, simInputs, legacyToIds, LEGACY_ORDER, LEVELS } = KodkerLessons;
 
   const PROGRESS_KEY = 'kodker:progress:v2';
   const OLD_PROGRESS_KEY = 'kodker:progress';
@@ -41,6 +41,35 @@
     onProgress: (i, n) => { $('cv-info').textContent = n > 1 ? 'فریم ' + i + ' / ' + n : ''; },
   });
   $('cv-replay').addEventListener('click', () => player.replay());
+
+  // ── یاری: دەستپێک و وەستان ──
+  let game = null, simJob = null;
+  function stopGame() {
+    if (game) { game.stop(); game = null; }
+    if (simJob) { simJob.stop(); simJob = null; }
+    $('cv-stop').hidden = true; $('cv-hint').hidden = true; $('cv-replay').hidden = false;
+  }
+  $('cv-stop').addEventListener('click', () => { stopGame(); setStatus('یارییەکە وەستێنرا', ''); });
+
+  /** وانەی یاری: لە worker ی جیاواز ئینپووتی دروستکراو دەدەین و فریمەکان کۆدەکەینەوە */
+  function simulate(src, l, cb) {
+    const inputs = simInputs(l), frames = [];
+    let i = 0;
+    simJob = KodkerRunner.run(src, {
+      out() {},
+      done: (r) => {
+        if (!r.ok || !r.interactive) { cb(null); return; }
+        const step = () => {
+          if (i >= inputs.length) { simJob.stop(); simJob = null; cb(frames); return; }
+          simJob.tick(inputs[i++], (f) => {
+            if (!f.ok) { if (simJob) { simJob.stop(); simJob = null; } cb(null); return; }
+            frames.push(f.cmds); step();
+          });
+        };
+        step();
+      },
+    });
+  }
 
   // ── لیستی وانەکان بە بەش ──
   function renderSidebar() {
@@ -129,6 +158,7 @@
 
   function run() {
     if (job) job.stop();
+    stopGame();
     output.textContent = '';
     setStatus('...');
     const src = editor.getValue();
@@ -141,14 +171,32 @@
         const d = document.createElement('div'); d.textContent = t; output.appendChild(d);
       },
       done: (r) => {
-        if (r.gfx) { cvPane.hidden = false; player.play(r.gfx); } else { player.stop(); cvPane.hidden = true; }
+        if (r.gfx) {
+          cvPane.hidden = false;
+          if (r.interactive) {
+            player.begin(r.gfx);
+            game = KodkerGame.start({
+              canvas: $('cv'), player, gfx: r.gfx, fps: r.fps,
+              tick: (input, cb) => job.tick(input, cb),
+              onError: (m) => { stopGame(); const d = document.createElement('div'); d.className = 'err'; d.textContent = '✖ ' + m; output.appendChild(d); setStatus('هەڵە', 'bad'); setMsg('✖ هەڵەیەک هەیە: ' + esc(m), 'bad'); },
+            });
+            $('cv-stop').hidden = false; $('cv-hint').hidden = false; $('cv-replay').hidden = true;
+          } else player.play(r.gfx);
+        } else { player.stop(); cvPane.hidden = true; }
         if (!r.ok) {
           const d = document.createElement('div'); d.className = 'err'; d.textContent = '✖ ' + r.error; output.appendChild(d);
           setStatus('هەڵە', 'bad');
           setMsg('✖ هەڵەیەک هەیە: ' + esc(r.error), 'bad');
           return;
         }
-        const c = check(l, lines, src, Kodker, r.gfx);
+        if (l.game && r.interactive) {
+          setStatus('🎮 پشکنین...', '');
+          simulate(src, l, (frames) => finish(check(l, lines, src, Kodker, r.gfx, frames || undefined), r));
+        } else finish(check(l, lines, src, Kodker, r.gfx), r);
+      },
+    });
+    function finish(c, r) {
+      {
         if (c.ok) {
           setStatus('✓ ڕاستە', 'ok');
           const wasDone = done.has(l.id);
@@ -173,8 +221,8 @@
           }
           setMsg(html, 'bad');
         }
-      },
-    });
+      }
+    }
   }
 
   // ── بڕوانامە ──

@@ -334,3 +334,30 @@ button[disabled] { opacity: .4; cursor: not-allowed; }
 .tut-play .cv-pane { border-top: 1px solid var(--line); flex: 0 0 auto; }
 .tut-play .cv-stage { padding: 10px; }
 .tut-play #output:empty { display: none; }
+
+/* ── یاری ── */
+.cv-bar button.stop { background: #5b1f2a; border-color: #ed5f5f; color: #ffb3b3; font-weight: 700; }
+.cv-bar button.stop:hover { background: #7a2736; }
+.cv-hint { font-size: .8rem; color: var(--sun); }
+.cv-stage canvas:focus-visible { outline: 2px solid var(--sun) !important; outline-offset: 3px; }
+
+/* ── گەلەری نموونە ── */
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 18px; }
+.chip { font: inherit; background: var(--panel); color: var(--muted, #9aa4c4); border: 1px solid var(--line); border-radius: 999px; padding: 6px 16px; cursor: pointer; transition: all .15s; }
+.chip:hover { color: #fff; border-color: var(--sun); }
+.chip.on { background: var(--sun); color: #1a1405; border-color: var(--sun); font-weight: 700; }
+.gallery { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.gcard { font: inherit; text-align: right; color: inherit; background: linear-gradient(180deg, var(--panel), #11172c); border: 1px solid var(--line); border-radius: var(--radius); padding: 0; overflow: hidden; cursor: pointer; transition: transform .18s, border-color .18s, box-shadow .18s; display: flex; flex-direction: column; }
+.gcard[hidden] { display: none; }
+.gcard:hover, .gcard:focus-visible { transform: translateY(-4px); border-color: var(--sun); box-shadow: 0 12px 30px -12px rgba(0,0,0,.7), 0 0 0 1px var(--sun); outline: none; }
+.gthumb { position: relative; aspect-ratio: 4 / 3; background: #080c1a; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.gthumb canvas { width: 100%; height: 100%; object-fit: contain; }
+.gbadge { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,.65); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; font-size: .78rem; }
+.gbody { padding: 12px 14px 14px; }
+.gbody h3 { margin: 0 0 4px; font-size: 1rem; color: #fff; }
+.gbody p { margin: 0; font-size: .85rem; color: var(--muted, #9aa4c4); }
+.ghint { display: block; margin-top: 8px; font-size: .75rem; color: var(--sun); }
+@media (max-width: 1000px) { .gallery { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 720px) { .gallery { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 440px) { .gallery { grid-template-columns: 1fr; } }
+.gthumb canvas { width: auto !important; height: 100% !important; max-width: 100% !important; }
