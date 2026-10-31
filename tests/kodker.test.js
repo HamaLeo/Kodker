@@ -156,7 +156,7 @@ test('هایلایت: ناوی کار و میتۆد', () => {
 
 test('وانەکان: وەڵامی هەر وانەیەک دەبێت تێپەڕێت', () => {
   const { lessons, check } = require('../docs/lessons.js');
-  assert.ok(lessons.length >= 28);
+  assert.ok(lessons.length >= 45);
   for (const [i, l] of lessons.entries()) {
     const r = out(l.solution);
     assert.ok(r.ok, `وانە ${i + 1}: ${r.error}`);
@@ -342,7 +342,7 @@ test('وانەکان: پێکهاتە (id ی یەکتا، بەش، کات، ئا�
     assert.ok(LEVELS[l.level], `${l.id}: ئاست`);
     assert.ok(Array.isArray(l.recap) && l.recap.length >= 2, `${l.id}: «بیرت بێت» کەمە`);
     assert.ok(l.hint && l.solution && l.task && l.body && l.starter, `${l.id}: بەشێک کەمە`);
-    assert.ok(l.expect || l.expectDraw || l.expectAny || l.minFrames, `${l.id}: پشکنینی نییە`);
+    assert.ok(l.expect || l.expectDraw || l.expectAny || l.minFrames || l.verify, `${l.id}: پشکنینی نییە`);
   }
   // هەر بەشێک لانیکەم یەک وانەی هەیە، و وانەکان بە ڕیزی بەشەکان دانراون
   const order = chapters.map((c) => c.id);
@@ -369,4 +369,36 @@ test('وانەکان: پشکنینی expectAny و ژمارەی ڕیزی هەڵە
   const r = check(flag, [], 'لاکێش', K, noMark.gfx);
   assert.strictEqual(r.ok, false);
   assert.match(r.reason, /نیشانەیەک/);
+});
+
+test('وانەی هەڕەمەکی: هەر جارێک وەڵامەکە تێدەپەڕێت (٣٠ جار)', () => {
+  const { lessons, check } = require('../docs/lessons.js');
+  const l = lessons.find((x) => x.id === 'random');
+  for (let i = 0; i < 30; i++) {
+    const r = out(l.solution);
+    assert.ok(check(l, r.lines, l.solution, K, r.gfx).ok, r.lines.join(','));
+  }
+  // ژمارەی هەڵە و ژمارەی ڕیزی هەڵە ڕەت دەکرێنەوە
+  assert.match(check(l, ['1', '2', '3'], 'هەڕەمەکی بۆ', K).reason, /٥ ڕیز/);
+  assert.match(check(l, ['1', '2', '3', '4', '9'], 'هەڕەمەکی بۆ', K).reason, /١ تا ٦/);
+});
+
+test('ژمارەی وانەکان لە README و پەڕە دروستە (بۆ ئەوەی هەرگیز نەگۆڕدرێت بێ نوێکردنەوە)', () => {
+  const { lessons } = require('../docs/lessons.js');
+  const kd = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d]);
+  const n = kd(lessons.length);
+  const read = (f) => fs.readFileSync(path.join(__dirname, '..', f), 'utf8');
+  assert.ok(read('README.md').includes(n + ' وانە'), 'README: ژمارەی وانەکان هەڵەیە، پێویستە ' + n + ' بێت');
+  assert.ok(read('docs/index.html').includes('<b>' + n + '</b><span>وانە</span>'), 'index.html: ئامار');
+  assert.ok(read('docs/index.html').includes(n + ' وانە'), 'index.html: تایبەتمەندی');
+  assert.ok(read('docs/tutorial.html').includes(n + ' وانە'), 'tutorial.html: meta');
+});
+
+test('هەموو وانەکان: بەکارهێنانی وشەی ناسراو، بێ ڕیزی دووبارە لە بەرنامەی وەڵامدا', () => {
+  const { lessons } = require('../docs/lessons.js');
+  for (const l of lessons) {
+    // هەموو وشەی mustUse دەبێت لە وەڵامەکەی خۆیدا بەکارهاتبێت (ئەگەر نا وانەکە ناتەواوە)
+    const words = new Set(K.tokenize(l.solution).filter((t) => t.type === 'word').map((t) => t.text));
+    for (const w of l.mustUse || []) assert.ok(words.has(w), `${l.id}: «${w}» لە وەڵامەکەدا نییە`);
+  }
 });
