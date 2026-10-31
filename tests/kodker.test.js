@@ -156,7 +156,7 @@ test('هایلایت: ناوی کار و میتۆد', () => {
 
 test('وانەکان: وەڵامی هەر وانەیەک دەبێت تێپەڕێت', () => {
   const { lessons, check } = require('../docs/lessons.js');
-  assert.ok(lessons.length >= 14);
+  assert.ok(lessons.length >= 28);
   for (const [i, l] of lessons.entries()) {
     const r = out(l.solution);
     assert.ok(r.ok, `وانە ${i + 1}: ${r.error}`);
@@ -329,4 +329,44 @@ test('canvas.js: فەرمانەکان بە دروستی لەسەر ctx جێبە�
   assert.ok(calls.some((c) => c[0] === 'strokeRect'));
   assert.strictEqual(calls.filter((c) => c[0] === 'lineTo').length, 42);   // خۆر: ٢١ تیشک × ٢
   assert.ok(calls.some((c) => c[0] === 'fillText' && c[1] === 'سڵاو'));
+});
+
+test('وانەکان: پێکهاتە (id ی یەکتا، بەش، کات، ئاست، بیرت بێت)', () => {
+  const { lessons, chapters, LEVELS } = require('../docs/lessons.js');
+  const ids = lessons.map((l) => l.id);
+  assert.strictEqual(new Set(ids).size, ids.length, 'id دووبارەیە');
+  const chapterIds = new Set(chapters.map((c) => c.id));
+  for (const l of lessons) {
+    assert.ok(chapterIds.has(l.chapter), `${l.id}: بەشی نەناسراو`);
+    assert.ok(l.minutes > 0 && l.minutes <= 20, `${l.id}: کات`);
+    assert.ok(LEVELS[l.level], `${l.id}: ئاست`);
+    assert.ok(Array.isArray(l.recap) && l.recap.length >= 2, `${l.id}: «بیرت بێت» کەمە`);
+    assert.ok(l.hint && l.solution && l.task && l.body && l.starter, `${l.id}: بەشێک کەمە`);
+    assert.ok(l.expect || l.expectDraw || l.expectAny || l.minFrames, `${l.id}: پشکنینی نییە`);
+  }
+  // هەر بەشێک لانیکەم یەک وانەی هەیە، و وانەکان بە ڕیزی بەشەکان دانراون
+  const order = chapters.map((c) => c.id);
+  let last = -1;
+  for (const l of lessons) {
+    const i = order.indexOf(l.chapter);
+    assert.ok(i >= last, `${l.id}: ڕیزبەندی بەشەکان هەڵەیە`);
+    last = i;
+  }
+  for (const c of chapters) assert.ok(lessons.some((l) => l.chapter === c.id), c.id);
+});
+
+test('وانەکان: پێشکەوتنی کۆن (ژمارە) دەگۆڕدرێت بۆ id', () => {
+  const { lessons, legacyToIds, LEGACY_ORDER } = require('../docs/lessons.js');
+  assert.deepStrictEqual(legacyToIds([0, 4, 13]), ['hello', 'if', 'animation']);
+  assert.deepStrictEqual(legacyToIds([99]), []);
+  for (const id of LEGACY_ORDER) assert.ok(lessons.some((l) => l.id === id), 'وانەی کۆن نەماوە: ' + id);
+});
+
+test('وانەکان: پشکنینی expectAny و ژمارەی ڕیزی هەڵە', () => {
+  const { lessons, check } = require('../docs/lessons.js');
+  const flag = lessons.find((l) => l.id === 'project-flag');
+  const noMark = draw('قەبارە(٤٠٠، ٢٦٠)\nلاکێش(٠، ٠، ٤٠٠، ٨٠)\nلاکێش(٠، ٨٠، ٤٠٠، ٨٠)\nلاکێش(٠، ١٦٠، ٤٠٠، ٨٠)');
+  const r = check(flag, [], 'لاکێش', K, noMark.gfx);
+  assert.strictEqual(r.ok, false);
+  assert.match(r.reason, /نیشانەیەک/);
 });
