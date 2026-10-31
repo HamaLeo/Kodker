@@ -156,7 +156,7 @@ test('هایلایت: ناوی کار و میتۆد', () => {
 
 test('وانەکان: وەڵامی هەر وانەیەک دەبێت تێپەڕێت', () => {
   const { lessons, check } = require('../docs/lessons.js');
-  assert.ok(lessons.length >= 98);
+  assert.ok(lessons.length >= 115);
   for (const [i, l] of lessons.entries()) {
     const r = out(l.solution);
     assert.ok(r.ok, `وانە ${i + 1}: ${r.error}`);
@@ -505,4 +505,49 @@ test('مەشقەکان: وەڵامی بیرکاری ڕێگە نادات بە م�
   const c = check(l, r.lines, viaString, K, r.gfx);
   assert.strictEqual(c.ok, false);
   assert.match(c.reason, /دابەشبکە/);
+});
+
+test('compose: وانە بە after ی هەڵە بێدەنگی ون نابێت', () => {
+  const src = fs.readFileSync(path.join(__dirname, '..', 'docs', 'lessons.js'), 'utf8');
+  // هەموو وانە زیادکراوەکان `after` یان ناوی وانەیەکی بنەڕەتییە
+  const L = require('../docs/lessons.js');
+  assert.ok(L.lessons.some((l) => l.id === 'falling-balls'), 'falling-balls ون بووە');
+  const broken = src.replace('id: "falling-balls", after: "animation"', 'id: "falling-balls", after: "bounce"');
+  assert.notStrictEqual(broken, src, 'جێگۆڕکێکە کاری نەکرد');
+  const mod = { exports: {} };
+  assert.throws(() => new Function('module', 'exports', broken)(mod, mod.exports), /وانەیەکی بنەڕەتی نییە/);
+});
+
+test('میتۆدە نوێیەکانی دەق: دەهەک، دووبارەبکەرەوە، پڕبکەرەوە، دەستپێدەکات، کۆتاییدێت', () => {
+  const r = out('چاپ((١٠ / ٣).دەهەک(٢))\nچاپ("#".دووبارەبکەرەوە(٤))\nچاپ(بکەدەق(٧).پڕبکەرەوە(٣، "0"))\nچاپ("کۆدکەر".دەستپێدەکات("کۆد")، "کۆدکەر".کۆتاییدێت("ەر"))');
+  assert.ok(r.ok, r.error);
+  assert.deepStrictEqual(r.lines, ['3.33', '####', '007', 'ڕاست ڕاست']);
+  assert.match(K.highlight('x.دەهەک(٢)'), /<span class="t-p">دەهەک<\/span>/);
+  assert.ok(labels('٣.دەه', 5).includes('دەهەک'));
+});
+
+test('شیکاری داتا: ئەنجامە زانراوەکان (CSV، گرووپ، تێکڕا، کۆگا، سیرپینسکی)', () => {
+  const { lessons } = require('../docs/lessons.js');
+  const lines = (id) => out(lessons.find((x) => x.id === id).solution).lines;
+  assert.deepStrictEqual(lines('csv-parse'), ['3', 'ئارام و شیرین و ڕێبین', '76']);
+  assert.deepStrictEqual(lines('group-count'), ['{ هەولێر: 3, سلێمانی: 1, دهۆک: 1 }', 'زۆرترین: هەولێر']);
+  assert.deepStrictEqual(lines('average-by-group'), ['کۆد: 85', 'بیرکاری: 70']);
+  assert.deepStrictEqual(lines('project-gradebook'), ['ئارام: 80', 'شیرین: 90', 'ڕێبین: 67.5', 'باشترین: شیرین']);
+  assert.deepStrictEqual(lines('project-inventory'), ['{ سێو: 7, پرتەقاڵ: 5 }', 'هەڵە: پێویست نییە: پرتەقاڵ', '12']);
+  assert.deepStrictEqual(lines('top-n'), ['ڕێبین (91) - هێمن (83) - ئارام (72)']);
+  // سیرپینسکی ئاستی ٣ = ٣^٣ = ٢٧ سێگۆشە
+  const sp = lessons.find((x) => x.id === 'sierpinski');
+  const r = out(sp.solution);
+  assert.strictEqual(r.gfx.frames.flat().filter((c) => c[0] === 'tri').length, 27);
+});
+
+test('وانەی تۆپی کەوتوو: ڕەتی دەکاتەوە ئەگەر تۆپەکان نەکەون', () => {
+  const { lessons, check } = require('../docs/lessons.js');
+  const l = lessons.find((x) => x.id === 'falling-balls');
+  const stay = 'قەبارە(٣٠٠، ٢٨٠)\nنەگۆڕ xەکان = [٣٠، ٩٠، ١٥٠، ٢١٠، ٢٧٠]\nبۆ t لە ٠ تا ٣٩ {\n  پاککەرەوە()\n  بۆ هەر x لە xەکان { بازنە(x، ٥٠، ١٢) }\n  فریم()\n}\n';
+  const r = out(stay);
+  const c = check(l, r.lines, stay, K, r.gfx);
+  assert.strictEqual(c.ok, false);
+  assert.match(c.reason, /بکەونە خوارەوە/);
+  assert.ok(check(l, out(l.solution).lines, l.solution, K, out(l.solution).gfx).ok);
 });
