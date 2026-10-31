@@ -29,10 +29,22 @@ const titles = {
   '24-pong': '🎮 پۆنگ (یاری)',
   '25-shooter': '🎮 تەقاندن (یاری)',
   '26-whack': '🎮 مشک بکوژە (یاری)',
+  '27-tictactoe': '🎮 ئێکس-ئۆ (یاری)',
+  '28-dino': '🎮 ڕاکردن (یاری)',
+  '29-memory': '🎮 بیرەوەری (یاری)',
+  '30-matrix': '🟩 باراني ماتریکس',
+  '31-lissajous': '〰 لیساجوس',
+  '32-paint': '🖌 پەنجەنگار',
 };
 
 // گرووپ: code | art | game  — و وەسف و کۆنترۆڵ بۆ گەلەری سەرەکی
 const meta = {
+  '27-tictactoe': { group: 'game', desc: 'لە کۆمپیوتەری زیرەک ببەرەوە یان یەکسان بە.', hint: 'کلیک', thumb: 5 },
+  '28-dino': { group: 'game', desc: 'باز بدە و لە کاکتووسەکان تێپەڕە.', hint: 'بۆشایی / کلیک', thumb: 20 },
+  '29-memory': { group: 'game', desc: 'جووتە کارتەکان بدۆزەوە.', hint: 'کلیک', thumb: 3 },
+  '30-matrix': { group: 'art', desc: 'پیتی دەکەون وەک ماتریکس.', hint: '', thumb: 220 },
+  '31-lissajous': { group: 'art', desc: 'شەپۆلی سینۆسی ڕەنگاوڕەنگ.', hint: 'ماوس', thumb: 40 },
+  '32-paint': { group: 'art', desc: 'بە ماوس بکێشە و ڕەنگ هەڵبژێرە.', hint: 'ماوس / ١-٥', thumb: 2 },
   '24-pong': { group: 'game', desc: 'لە کۆمپیوتەر ببەرەوە، یەکەم بە ٥ خاڵ.', hint: 'ماوس / ↑ ↓', thumb: 50 },
   '25-shooter': { group: 'game', desc: 'دوژمنەکان بتەقێنە و کەشتییەکەت بپارێزە.', hint: '← → و بۆشایی', thumb: 150 },
   '26-whack': { group: 'game', desc: 'مشکەکان بکوژە پێش ئەوەی ون بن!', hint: 'کلیک', thumb: 40 },
