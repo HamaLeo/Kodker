@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   const W = 1400, H = 990;
-  const FONT = '"Noto Naskh Arabic","Segoe UI",Tahoma,sans-serif';
+  const FONT = '"Vazirmatn","Noto Naskh Arabic","Segoe UI",Tahoma,sans-serif';
 
   const MONTHS = ['کانوونی دووەم', 'شوبات', 'ئازار', 'نیسان', 'ئایار', 'حوزەیران', 'تەمموز', 'ئاب', 'ئەیلوول', 'تشرینی یەکەم', 'تشرینی دووەم', 'کانوونی یەکەم'];
 

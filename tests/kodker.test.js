@@ -551,3 +551,32 @@ test('وانەی تۆپی کەوتوو: ڕەتی دەکاتەوە ئەگەر ت�
   assert.match(c.reason, /بکەونە خوارەوە/);
   assert.ok(check(l, out(l.solution).lines, l.solution, K, out(l.solution).gfx).ok);
 });
+
+test('فۆنت: Vazirmatn (OFL) ڕێکخراوە، فایلەکان هەن، و مۆڵەتەکەی لەگەڵیانە', () => {
+  const read = (f) => fs.readFileSync(path.join(__dirname, '..', f), 'utf8');
+  const css = read('docs/style.css');
+  assert.match(css, /--font:\s*"Vazirmatn"/, 'فۆنتی سەرەکی دەبێت Vazirmatn بێت');
+  for (const w of [400, 700, 800]) {
+    for (const sub of ['arabic', 'latin']) {
+      const f = `docs/fonts/vazirmatn-${sub}-${w}-normal.woff2`;
+      assert.ok(fs.existsSync(path.join(__dirname, '..', f)), f + ' نییە');
+      assert.ok(css.includes(`fonts/vazirmatn-${sub}-${w}-normal.woff2`), f + ' لە @font-face نییە');
+    }
+  }
+  assert.match(read('docs/fonts/OFL-Vazirmatn.txt'), /SIL OPEN FONT LICENSE/);
+  // پیتە کوردییەکان دەبێت لە subset ی arabic دا بن (U+0600-06FF) 
+  assert.match(css, /unicode-range:\s*U\+0600-06FF/);
+  // کۆد بە monospace دەمێنێتەوە و Vazirmatn تەنها وەک یەدەگی پیتی کوردی لە کۆددایە
+  assert.match(css, /--mono:\s*ui-monospace[^;]*"Vazirmatn"[^;]*monospace/);
+});
+
+test('فۆنت: فایلی فۆنتی سپێدە (مۆڵەتی تایبەت، بڵاوکردنەوەی قەدەغەیە) نابێت لە ڕیپۆدا بێت', () => {
+  const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+    if (e.name === 'node_modules' || e.name === '.git') return [];
+    const p = path.join(dir, e.name);
+    return e.isDirectory() ? walk(p) : [p];
+  });
+  const bad = walk(path.join(__dirname, '..')).filter((f) => /speda/i.test(path.basename(f)) && /\.(ttf|otf|woff2?|eot)$/i.test(f));
+  assert.deepStrictEqual(bad, [], 'فۆنتی سپێدە نابێت بڵاو بکرێتەوە: ' + bad.join(', '));
+  assert.ok(!fs.readFileSync(path.join(__dirname, '..', 'docs', 'style.css'), 'utf8').match(/url\([^)]*speda/i));
+});

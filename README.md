@@ -133,7 +133,9 @@ npm run build    # دوای گۆڕینی examples/*.kd، docs/examples.js نوێ
 هەموو کەس بەخێرهاتووە! وشەی نوێ پێشنیار بکە، نموونە زیاد بکە، یان هەڵە ڕاست بکەرەوە. Issue یان Pull Request بکەرەوە.
 
 ## 📜 مۆڵەت
-[MIT](LICENSE)
+کۆدی پڕۆژەکە: [MIT](LICENSE).
+
+**فۆنت:** سایتەکە فۆنتی [Vazirmatn](https://github.com/rastikerdar/vazirmatn) بەکاردەهێنێت (مۆڵەتی [SIL OFL 1.1](docs/fonts/OFL-Vazirmatn.txt)؛ فایلەکان لە [`docs/fonts/`](docs/fonts/)). هەموو پیتە کوردییەکانی سۆرانی (`ە ۆ ێ ڕ ڵ ڤ گ پ چ ژ`) پشتگیری دەکات.
 
 ---
 

@@ -185,6 +185,11 @@
   function openCertificate() {
     nameInput.value = store.get(NAME_KEY, '');
     paintCert();
+    // فۆنتی وێب پێش کێشانی Canvas دەبێت بار بکرێت، ئەگینا بڕوانامە بە فۆنتی یەدەگ دەکێشرێت
+    if (document.fonts && document.fonts.load) {
+      Promise.all(['400', '700', '800'].map((w) => document.fonts.load(w + ' 40px Vazirmatn', 'ئابپ')))
+        .then(paintCert).catch(() => {});
+    }
     if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
     nameInput.focus();
   }
