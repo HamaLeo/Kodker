@@ -357,6 +357,100 @@
     return html;
   }
 
+  // ───────────────────────── تەواوکردنی خۆکار ─────────────────────────
+  const BUILTIN_INFO = {
+    'چاپ': 'console.log', 'هەڕەمەکی': 'random', 'بکەژمارە': 'Number', 'بکەدەق': 'String',
+    'ڕەگ': 'sqrt', 'توان': 'pow', 'خوارکە': 'floor', 'سەرکە': 'ceil', 'گردبکە': 'round',
+    'ڕەها': 'abs', 'گەورەترین': 'max', 'بچووکترین': 'min', 'پای': 'π',
+  };
+  const CONTROL_INFO = {
+    'ئەگەر': 'if', 'هەتا': 'while', 'بۆ': 'for', 'لە': 'for … لە', 'تا': 'for … تا', 'هەنگاو': 'for … هەنگاو', 'هەر': 'for … هەر',
+  };
+  // قاڵبی کۆد: $0 شوێنی نیشانەکەیە. دێڕە نوێیەکان لە ئێدیتەر بە هەمان نزمکردنەوە (indent) دەنووسرێن.
+  const SNIPPETS = {
+    'ئەگەر': 'ئەگەر $0 {\n  \n}',
+    'ئەگەرنا': 'ئەگەرنا {\n  $0\n}',
+    'هەتا': 'هەتا $0 {\n  \n}',
+    'بۆ': 'بۆ i لە ١ تا $0 {\n  \n}',
+    'کار': 'کار $0() {\n  \n}',
+    'پۆل': 'پۆل $0 {\n  \n}',
+    'تاقیبکەرەوە': 'تاقیبکەرەوە {\n  $0\n} گیرکە (کێشە) {\n  \n}',
+  };
+  const DECLARES_NAME = new Set(['کار', 'پۆل', 'گۆڕاو', 'نەگۆڕ', 'بۆ', 'هەر']);
+  const NON_METHOD_PROPS = new Set(['درێژی']);
+  const KIND_ORDER = { kw: 0, fn: 1, prop: 1, var: 2 };
+  const MAX_COMPLETIONS = 8;
+
+  /**
+   * پێشنیاری تەواوکردنی وشە لە شوێنی نیشانەی نووسین (caret).
+   * @param {string} source کۆدەکە
+   * @param {number} pos شوێنی caret (ژمارەی پیت)
+   * @returns {{from:number,to:number,prefix:string,items:Array<{label:string,kind:string,detail:string,template:string}>}|null}
+   */
+  function completions(source, pos) {
+    source = String(source);
+    const tokens = tokenize(source);
+    const starts = [];
+    let offset = 0;
+    for (const t of tokens) { starts.push(offset); offset += t.raw.length; }
+
+    // وشەیەک کە caret لە کۆتاییەکەیەتی (نە لە ناو دەق/کۆمێنت، نە لە ناوەڕاستی وشە)
+    let idx = -1;
+    for (let i = 0; i < tokens.length; i++) {
+      if (tokens[i].type === 'word' && starts[i] < pos && pos === starts[i] + tokens[i].raw.length) { idx = i; break; }
+    }
+    if (idx === -1) return null;
+
+    const prefix = tokens[idx].text;
+    let prev = null;
+    for (let j = idx - 1; j >= 0; j--) {
+      if (tokens[j].type !== 'ws' && tokens[j].type !== 'comment') { prev = tokens[j]; break; }
+    }
+    const member = !!prev && prev.type === 'punct' && prev.text === '.';
+    if (prev && prev.type === 'word' && DECLARES_NAME.has(prev.text)) return null; // ناوی نوێ دەنووسرێت
+
+    const items = [];
+    const seen = new Set();
+    const add = (label, kind, detail, template) => {
+      if (seen.has(label) || !label.startsWith(prefix)) return;
+      seen.add(label);
+      items.push({ label, kind, detail, template: template || label });
+    };
+
+    if (member) {
+      for (const k of Object.keys(PROPS)) add(k, 'prop', PROPS[k], NON_METHOD_PROPS.has(k) ? k : k + '($0)');
+      // ناوی ئەو تایبەتمەندییانەی لە کۆدەکەدا بەکارهاتوون (وەک ئەمە.پانی)
+      tokens.forEach((t, i) => {
+        if (i === idx || t.type !== 'word') return;
+        let q = null;
+        for (let j = i - 1; j >= 0; j--) if (tokens[j].type !== 'ws' && tokens[j].type !== 'comment') { q = tokens[j]; break; }
+        if (q && q.text === '.' && !Object.prototype.hasOwnProperty.call(PROPS, t.text)) add(t.text, 'var', 'تایبەتمەندی');
+      });
+    } else {
+      for (const k of Object.keys(KEYWORDS)) {
+        if (k === 'و') continue; // یەک پیتە و تەنها شڵەژان دروست دەکات
+        add(k, 'kw', KEYWORDS[k], SNIPPETS[k]);
+      }
+      for (const k of Object.keys(CONTROL_INFO)) add(k, 'kw', CONTROL_INFO[k], SNIPPETS[k]);
+      for (const k of Object.keys(BUILTIN_INFO)) add(k, 'fn', BUILTIN_INFO[k], k === 'پای' ? k : k + '($0)');
+      tokens.forEach((t, i) => {
+        if (i === idx || t.type !== 'word') return;
+        let q = null;
+        for (let j = i - 1; j >= 0; j--) if (tokens[j].type !== 'ws' && tokens[j].type !== 'comment') { q = tokens[j]; break; }
+        if (q && q.text === '.') return;
+        add(t.text, 'var', 'گۆڕاو');
+      });
+    }
+
+    let list = items;
+    // ئەگەر تەنها یەک پێشنیار هەبێت و هەمان ئەوەی نووسراوە بێت و هیچ قاڵبێکی نەبێت، پێویست نییە
+    if (list.length === 1 && list[0].label === prefix && list[0].template === prefix) return null;
+    list = list.filter((it) => !(it.kind === 'var' && it.label === prefix));
+    if (!list.length) return null;
+    list.sort((a, b) => (KIND_ORDER[a.kind] - KIND_ORDER[b.kind]) || (a.label < b.label ? -1 : a.label > b.label ? 1 : 0));
+    return { from: starts[idx], to: pos, prefix, items: list.slice(0, MAX_COMPLETIONS) };
+  }
+
   /**
    * کۆدی کوردی جێبەجێ دەکات.
    * @returns {{ok: boolean, js: string|null, error: string|null}}
@@ -382,5 +476,5 @@
     return { ok: true, js, error: null };
   }
 
-  return { transpile, tokenize, highlight, run, format, KEYWORDS, PROPS, KodkerError, VERSION: '0.1.0' };
+  return { transpile, tokenize, highlight, completions, run, format, KEYWORDS, PROPS, KodkerError, VERSION: '0.1.0' };
 });

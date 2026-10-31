@@ -155,3 +155,20 @@ footer { text-align: center; color: var(--muted); padding: 24px 16px 40px; borde
   .playground { grid-template-columns: 1fr; }
   .pane { min-height: 320px; }
 }
+
+/* ── تەواوکردنی خۆکار ── */
+.ac {
+  position: fixed; z-index: 50; margin: 0; padding: 4px; list-style: none; min-width: 220px; max-width: 340px; max-height: 280px; overflow: auto;
+  background: #1b2140; border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 12px 32px rgba(0,0,0,.5);
+  font-family: var(--font); direction: rtl;
+}
+.ac[hidden] { display: none; }
+.ac-item { display: flex; align-items: center; gap: 10px; padding: 5px 10px; border-radius: 7px; cursor: pointer; color: var(--text); }
+.ac-item.sel, .ac-item:hover { background: #2b3563; }
+.ac-label { font: 1rem var(--mono); flex: 1; }
+.ac-detail { font: .8rem var(--mono); color: var(--muted); direction: ltr; }
+.ac-kind { font-size: .7rem; padding: 0 7px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); min-width: 40px; text-align: center; }
+.ac-kind.k-kw { color: #ff8a5c; border-color: #ff8a5c66; }
+.ac-kind.k-fn { color: #5ec8ff; border-color: #5ec8ff66; }
+.ac-kind.k-prop { color: #7fd6c2; border-color: #7fd6c266; }
+.ac-kind.k-var { color: #cdd6f4; }
