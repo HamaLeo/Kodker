@@ -126,9 +126,28 @@
       raf = requestAnimationFrame(tick);
     }
 
+    // یاری: کانڤاس ئامادە بکە و فەرمانەکانی ئامادەکاری بکێشە، دواتر هەر فریمێک بە draw()
+    function begin(gfx) {
+      stop();
+      current = gfx;
+      setup(gfx);
+      gfx.frames.forEach((f) => f.forEach((c) => apply(ctx, c, gfx.width, gfx.height)));
+    }
+    function draw(cmds) {
+      if (!current) return;
+      for (let i = 0; i < cmds.length; i++) apply(ctx, cmds[i], current.width, current.height);
+    }
+    // هەموو فریمەکان دەستبەجێ بکێشە و دوایین دۆخ نیشان بدە (بۆ وێنە بچووکەکانی گەلەری)
+    function renderFinal(gfx) {
+      begin(gfx);
+      info(gfx.frames.length);
+    }
+    function info(n) { if (opts.onProgress) opts.onProgress(n, n); }
+
     return {
-      play,
-      stop,
+      play, stop, begin, draw, renderFinal,
+      canvas,
+      get size() { return current ? { width: current.width, height: current.height } : null; },
       replay: () => { if (current) play(current); },
       png: () => canvas.toDataURL('image/png'),
     };
