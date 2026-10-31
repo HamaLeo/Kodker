@@ -35,10 +35,22 @@ const titles = {
   '30-matrix': '🟩 باراني ماتریکس',
   '31-lissajous': '〰 لیساجوس',
   '32-paint': '🖌 پەنجەنگار',
+  '33-maze': '🎮 پیچەڵپێچ (یاری)',
+  '34-cars': '🎮 ڕێگا (یاری)',
+  '35-simon': '🎮 سایمن (یاری)',
+  '36-snow': '❄ بەفر',
+  '37-waves': '🌊 شەپۆل',
+  '38-sort': '🔢 ڕیزکردن (Bubble Sort)',
 };
 
 // گرووپ: code | art | game  — و وەسف و کۆنترۆڵ بۆ گەلەری سەرەکی
 const meta = {
+  '33-maze': { group: 'game', desc: 'سکەکان کۆبکەرەوە و دەرچوون بدۆزەوە.', hint: 'تیرەکان', thumb: 2 },
+  '34-cars': { group: 'game', desc: 'لە ئوتومبێلەکان ڕابکە.', hint: '← → / کلیک', thumb: 70 },
+  '35-simon': { group: 'game', desc: 'ڕیزبەندی ڕەنگەکان دووبارە بکەرەوە.', hint: 'کلیک', thumb: 60 },
+  '36-snow': { group: 'art', desc: 'شەوێکی بەفراوی، با بە ماوس.', hint: 'ماوس', thumb: 80 },
+  '37-waves': { group: 'art', desc: 'شەپۆلەکان لەگەڵ خۆرئاوابوون.', hint: '', thumb: 30 },
+  '38-sort': { group: 'art', desc: 'ئەلگۆریتمی ڕیزکردن بە چاو ببینە.', hint: 'کلیک', thumb: 200 },
   '27-tictactoe': { group: 'game', desc: 'لە کۆمپیوتەری زیرەک ببەرەوە یان یەکسان بە.', hint: 'کلیک', thumb: 5 },
   '28-dino': { group: 'game', desc: 'باز بدە و لە کاکتووسەکان تێپەڕە.', hint: 'بۆشایی / کلیک', thumb: 20 },
   '29-memory': { group: 'game', desc: 'جووتە کارتەکان بدۆزەوە.', hint: 'کلیک', thumb: 3 },
