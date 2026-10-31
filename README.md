@@ -1,6 +1,8 @@
 <div align="center">
 
-# ☀ کۆدکەر · Kodker
+<img src="docs/logo.svg" alt="لۆگۆی کۆدکەر" width="120">
+
+# کۆدکەر · Kodker
 
 **پڕۆگرامینگ بە زمانی کوردی**
 

@@ -76,28 +76,40 @@
   // ── ڕێنمایی ──
   const guide = [
     ['گۆڕاو و نەگۆڕ', [['گۆڕاو x = ٥', 'let'], ['نەگۆڕ ناو = "هەژار"', 'const'], ['ڕاست · هەڵە · هیچ', 'true · false · null']]],
-    ['چاپکردن', [['چاپ("سڵاو", ناو)', 'console.log']]],
+    ['چاپکردن', [['چاپ("سڵاو", ناو)', 'console.log'], ['ئەمە // کۆمێنتە', '// comment']]],
     ['مەرج', [['ئەگەر x > ٥ { }', 'if'], ['ئەگەرنا ئەگەر ... { }', 'else if'], ['ئەگەرنا { }', 'else'], ['و · یان · نەک', '&& · || · !']]],
     ['بازنە', [['بۆ i لە ١ تا ١٠ { }', 'for'], ['... هەنگاو ٢', 'step'], ['بۆ هەر x لە لیست { }', 'for…of'], ['هەتا ڕاست { }', 'while'], ['بشکێنە · بەردەوامبە', 'break · continue']]],
     ['کار (فەنکشن)', [['کار کۆ(a, b) { }', 'function'], ['گەڕێنەوە a + b', 'return'], ['(a) => a * ٢', 'arrow']]],
     ['لیست', [['ل.درێژی', 'length'], ['ل.زیادبکە(x)', 'push'], ['ل.نەخشە(f)', 'map'], ['ل.پاڵاوتن(f)', 'filter'], ['ل.کۆکردنەوە(f, ٠)', 'reduce'], ['ل.ڕیزبکە()', 'sort']]],
     ['پۆل', [['پۆل ئاژەڵ { }', 'class'], ['کۆنستراکتەر() { }', 'constructor'], ['نوێ ئاژەڵ()', 'new'], ['ئەمە.ناو', 'this']]],
     ['هەڵە', [['تاقیبکەرەوە { }', 'try'], ['گیرکە (کێشە) { }', 'catch'], ['فڕێبدە نوێ Error("..")', 'throw']]],
-    ['بیرکاری', [['ڕەگ(x) · توان(a, b)', 'sqrt · pow'], ['خوارکە · سەرکە · گردبکە', 'floor · ceil · round'], ['هەڕەمەکی(١, ١٠٠)', 'random int'], ['بکەژمارە(x) · بکەدەق(x)', 'Number · String']]],
+    ['بیرکاری', [['ڕەگ(x) · توان(a, b)', 'sqrt · pow'], ['خوارکە · سەرکە · گردبکە', 'floor · ceil · round'], ['هەڕەمەکی(١, ١٠٠)', 'random int'], ['بکەژمارە · بکەدەق', 'Number · String']]],
   ];
   const cards = $('cards');
   guide.forEach(([title, rows]) => {
     const c = document.createElement('div'); c.className = 'card';
     const h = document.createElement('h3'); h.textContent = title; c.appendChild(h);
-    const t = document.createElement('table');
     rows.forEach(([k, js]) => {
-      const tr = document.createElement('tr');
-      const a = document.createElement('td'); a.textContent = k;
-      const b = document.createElement('td'); b.className = 'js'; b.textContent = js;
-      tr.append(a, b); t.appendChild(tr);
+      const r = document.createElement('div'); r.className = 'row';
+      const a = document.createElement('code'); a.textContent = k;
+      const b = document.createElement('span'); b.className = 'js'; b.textContent = js;
+      r.append(a, b); c.appendChild(r);
     });
-    c.appendChild(t); cards.appendChild(c);
+    cards.appendChild(c);
   });
+
+  // ── نموونەی «چۆن کار دەکات؟» ──
+  const demo = [
+    'نەگۆڕ میوە = ["سێو"، "مۆز"، "هەنار"]',
+    '',
+    'بۆ هەر م لە میوە {',
+    '  ئەگەر م.درێژی > ٣ {',
+    '    چاپ("میوەی درێژ:", م)',
+    '  }',
+    '}',
+  ].join('\n');
+  $('demo-kd').innerHTML = Kodker.highlight(demo);
+  $('demo-js').textContent = Kodker.transpile(demo);
 
   run();
 })();
