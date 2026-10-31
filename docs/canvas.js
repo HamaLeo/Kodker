@@ -5,7 +5,7 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  const FONT = '"Noto Naskh Arabic","Segoe UI",Tahoma,sans-serif';
+  const FONT = '"Vazirmatn","Noto Naskh Arabic","Segoe UI",Tahoma,sans-serif';
   const SUN_RAYS = 21; // ژمارەی تیشکەکانی خۆری ئاڵای کوردستان
 
   function defaults(ctx, w, h) {
@@ -78,6 +78,7 @@
     opts = opts || {};
     const ctx = canvas.getContext('2d');
     let raf = 0, token = 0, current = null;
+    if (typeof document !== 'undefined' && document.fonts && document.fonts.load) document.fonts.load('24px Vazirmatn', 'ئاب').catch(() => {});
 
     function setup(gfx) {
       const dpr = Math.min((typeof window !== 'undefined' && window.devicePixelRatio) || 1, 2);
