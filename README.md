@@ -7,7 +7,7 @@
 زمانێکی پڕۆگرامینگی کراوە (open-source) بە سینتاکسی کوردی (سۆرانی) کە دەگۆڕدرێت بۆ JavaScript.
 وێبگەڕەکەت بکەرەوە، کۆد بنووسە و جێبەجێی بکە، بێ دابەزاندن.
 
-[**🚀 Playground**](https://hamaleo.github.io/HamaLeo/) · [**🎓 فێرکاری**](https://hamaleo.github.io/HamaLeo/tutorial.html) · [نموونەکان](examples) · [ڕێنمایی](#-ڕێنمایی-خێرا)
+[**🚀 Playground**](https://hamaleo.github.io/kodker/) · [**🎓 فێرکاری**](https://hamaleo.github.io/kodker/tutorial.html) · [نموونەکان](examples) · [ڕێنمایی](#-ڕێنمایی-خێرا)
 
 *A Kurdish (Sorani) programming language that compiles to JavaScript, with a zero-install web playground.*
 
@@ -68,12 +68,12 @@
 ## 💻 بەکارهێنان
 
 ### لە وێبگەڕ
-بچۆ بۆ **[hamaleo.github.io/HamaLeo](https://hamaleo.github.io/HamaLeo/)** (دوای چالاککردنی GitHub Pages، بڕوانە خوارەوە).
+بچۆ بۆ **[hamaleo.github.io/kodker](https://hamaleo.github.io/kodker/)** (دوای چالاککردنی GitHub Pages، بڕوانە خوارەوە).
 
 ### لە تێرمیناڵ (پێویستی بە Node.js ≥ 18 هەیە)
 ```bash
-git clone https://github.com/HamaLeo/HamaLeo.git
-cd HamaLeo
+git clone https://github.com/HamaLeo/kodker.git
+cd kodker
 node bin/kodker.js examples/02-fibonacci.kd       # جێبەجێکردن
 node bin/kodker.js --js examples/02-fibonacci.kd  # تەنها JavaScript ـەکەی نیشان بدە
 ```
