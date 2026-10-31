@@ -156,7 +156,7 @@ test('هایلایت: ناوی کار و میتۆد', () => {
 
 test('وانەکان: وەڵامی هەر وانەیەک دەبێت تێپەڕێت', () => {
   const { lessons, check } = require('../docs/lessons.js');
-  assert.ok(lessons.length >= 45);
+  assert.ok(lessons.length >= 64);
   for (const [i, l] of lessons.entries()) {
     const r = out(l.solution);
     assert.ok(r.ok, `وانە ${i + 1}: ${r.error}`);
@@ -401,4 +401,31 @@ test('هەموو وانەکان: بەکارهێنانی وشەی ناسراو، 
     const words = new Set(K.tokenize(l.solution).filter((t) => t.type === 'word').map((t) => t.text));
     for (const w of l.mustUse || []) assert.ok(words.has(w), `${l.id}: «${w}» لە وەڵامەکەدا نییە`);
   }
+});
+
+test('وانەکانی «دۆزینەوەی هەڵە»: کۆدی دەستپێک ئەو هەڵەیە دەدات کە لە وانەکەدا باسکراوە', () => {
+  const { lessons } = require('../docs/lessons.js');
+  const run = (id) => { const l = lessons.find((x) => x.id === id); return out(l.starter); };
+  assert.deepStrictEqual(run('debug-loop').lines, ['11']);
+  assert.deepStrictEqual(run('debug-condition').lines, ['باش', 'باش', 'کەوتوو']);
+  assert.deepStrictEqual(run('debug-function').lines, ['9', 'ئەنجام: نەناسراو', '5', 'ئەنجام: نەناسراو']);
+  const scope = run('scope');
+  assert.strictEqual(scope.ok, false);
+  assert.match(scope.error, /پێناسە نەکراوە/);
+});
+
+test('وانەکان: mustNotUse (ئەگەری کورت بێ ئەگەر)', () => {
+  const { lessons, check } = require('../docs/lessons.js');
+  const l = lessons.find((x) => x.id === 'ternary');
+  const alt = 'نەگۆڕ ژمارەکان = [٧، ١٢، ٣]\nبۆ هەر ن لە ژمارەکان {\n  ئەگەر ن % ٢ == ٠ { چاپ(ن + ": جووت") } ئەگەرنا { چاپ(ن + ": تاک") }\n}\n';
+  const r = out(alt);
+  const c = check(l, r.lines, alt, K);
+  assert.strictEqual(c.ok, false);
+  assert.match(c.reason, /نابێت/);
+});
+
+test('ئەگەری کورت (؟ :) کار دەکات', () => {
+  const r = out('چاپ(٥ > ٣ ؟ "ڕاست" : "هەڵە")\nچاپ(٥ < ٣ ؟ "یەک" : "دوو")');
+  assert.ok(r.ok, r.error);
+  assert.deepStrictEqual(r.lines, ['ڕاست', 'دوو']);
 });
