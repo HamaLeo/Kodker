@@ -100,22 +100,22 @@
     while (i < n) {
       const c = src[i];
 
-      if (INVISIBLE.test(c)) { i++; continue; }
+      if (INVISIBLE.test(c)) { tokens.push({ type: 'ws', text: '', raw: c }); i++; continue; }
 
       if (/\s/.test(c)) {
         let j = i;
         while (j < n && /\s/.test(src[j])) j++;
-        tokens.push({ type: 'ws', text: src.slice(i, j) });
+        tokens.push({ type: 'ws', text: src.slice(i, j), raw: src.slice(i, j) });
         i = j;
       } else if (c === '/' && src[i + 1] === '/') {
         let j = i;
         while (j < n && src[j] !== '\n') j++;
-        tokens.push({ type: 'comment', text: src.slice(i, j) });
+        tokens.push({ type: 'comment', text: src.slice(i, j), raw: src.slice(i, j) });
         i = j;
       } else if (c === '/' && src[i + 1] === '*') {
         let j = src.indexOf('*/', i + 2);
         j = j === -1 ? n : j + 2;
-        tokens.push({ type: 'comment', text: src.slice(i, j) });
+        tokens.push({ type: 'comment', text: src.slice(i, j), raw: src.slice(i, j) });
         i = j;
       } else if (c === '"' || c === "'" || c === '`') {
         let j = i + 1;
@@ -125,7 +125,7 @@
           j++;
         }
         j = Math.min(j + 1, n);
-        tokens.push({ type: 'str', text: src.slice(i, j) });
+        tokens.push({ type: 'str', text: src.slice(i, j), raw: src.slice(i, j) });
         i = j;
       } else if (DIGIT.test(c)) {
         let j = i;
@@ -134,15 +134,15 @@
           j++;
           while (j < n && DIGIT.test(src[j])) j++;
         }
-        tokens.push({ type: 'num', text: toAsciiDigits(src.slice(i, j)) });
+        tokens.push({ type: 'num', text: toAsciiDigits(src.slice(i, j)), raw: src.slice(i, j) });
         i = j;
       } else if (WORD_START.test(c)) {
         let j = i + 1;
         while (j < n && WORD_PART.test(src[j])) j++;
-        tokens.push({ type: 'word', text: normalizeWord(src.slice(i, j)) });
+        tokens.push({ type: 'word', text: normalizeWord(src.slice(i, j)), raw: src.slice(i, j) });
         i = j;
       } else {
-        tokens.push({ type: 'punct', text: PUNCT_MAP[c] || c });
+        tokens.push({ type: 'punct', text: PUNCT_MAP[c] || c, raw: c });
         i++;
       }
     }
@@ -322,6 +322,41 @@
     return msg;
   }
 
+
+  // ───────────────────────── هایلایتکردنی سینتاکس ─────────────────────────
+  const CONTROL = new Set(['ئەگەر', 'هەتا', 'بۆ', 'لە', 'تا', 'هەنگاو', 'هەر']);
+  const CONSTANTS = new Set(['ڕاست', 'هەڵە', 'هیچ', 'نەناسراو', 'ئەمە']);
+  const BUILTIN_NAMES = new Set(Object.keys(createBuiltins(function () {}, 1)));
+  const escapeHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  /**
+   * کۆدەکە دەگۆڕێت بۆ HTML ی ڕەنگکراو. دەقە سەرەکییەکە بە تەواوی دەپارێزرێت
+   * (بۆ ئەوەی لەسەر textarea دابنرێت بێ جیاوازی لە شوێنی پیتەکان).
+   */
+  function highlight(source) {
+    const tokens = tokenize(String(source));
+    let html = '';
+    let prev = null;
+    let prevPrev = null;
+    for (const t of tokens) {
+      let cls = '';
+      if (t.type === 'comment') cls = 'c';
+      else if (t.type === 'str') cls = 's';
+      else if (t.type === 'num') cls = 'n';
+      else if (t.type === 'word') {
+        if (prev && prev.text === '.') cls = Object.prototype.hasOwnProperty.call(PROPS, t.text) ? 'p' : '';
+        else if (prev && prev.type === 'word' && (prev.text === 'کار' || prev.text === 'پۆل')) cls = 'd';
+        else if (CONSTANTS.has(t.text)) cls = 'v';
+        else if (CONTROL.has(t.text) || Object.prototype.hasOwnProperty.call(KEYWORDS, t.text)) cls = 'k';
+        else if (BUILTIN_NAMES.has(t.text)) cls = 'f';
+      }
+      const raw = escapeHtml(t.raw);
+      html += cls ? '<span class="t-' + cls + '">' + raw + '</span>' : raw;
+      if (t.type !== 'ws' && t.type !== 'comment') { prevPrev = prev; prev = t; }
+    }
+    return html;
+  }
+
   /**
    * کۆدی کوردی جێبەجێ دەکات.
    * @returns {{ok: boolean, js: string|null, error: string|null}}
@@ -347,5 +382,5 @@
     return { ok: true, js, error: null };
   }
 
-  return { transpile, tokenize, run, format, KEYWORDS, PROPS, KodkerError, VERSION: '0.1.0' };
+  return { transpile, tokenize, highlight, run, format, KEYWORDS, PROPS, KodkerError, VERSION: '0.1.0' };
 });

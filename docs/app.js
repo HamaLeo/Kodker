@@ -1,8 +1,7 @@
 (function () {
   'use strict';
   const $ = (id) => document.getElementById(id);
-  const code = $('code'), output = $('output'), jsOut = $('js'), status = $('status'), sel = $('examples');
-  const TIMEOUT_MS = 5000;
+  const output = $('output'), jsOut = $('js'), status = $('status'), sel = $('examples');
   const examples = window.KODKER_EXAMPLES || [];
 
   $('ver').textContent = 'v' + Kodker.VERSION;
@@ -13,7 +12,7 @@
     o.value = i; o.textContent = ex.title;
     sel.appendChild(o);
   });
-  sel.addEventListener('change', () => { code.value = examples[sel.value].code; run(); });
+  sel.addEventListener('change', () => { editor.setValue(examples[sel.value].code); run(); });
 
   // ── بارکردنی کۆد لە URL ──
   function encode(s) {
@@ -27,7 +26,8 @@
     return new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0)));
   }
   const m = location.hash.match(/^#code=(.+)$/);
-  try { code.value = m ? decode(m[1]) : examples[0].code; } catch (e) { code.value = examples[0] ? examples[0].code : ''; }
+  const editor = KodkerEditor.create($('editor'), { onRun: () => run() });
+  try { editor.setValue(m ? decode(m[1]) : examples[0].code); } catch (e) { editor.setValue(examples[0] ? examples[0].code : ''); }
 
   // ── دەرچوون ──
   function addLine(text, cls) {
@@ -39,58 +39,28 @@
   function setStatus(text, cls) { status.textContent = text; status.className = 'status ' + (cls || ''); }
 
   // ── جێبەجێکردن (لە Worker، بە کاتی سنووردار) ──
-  let worker = null, timer = null;
-  function stop() { if (worker) { worker.terminate(); worker = null; } clearTimeout(timer); }
-
-  function finish(ok, js, error) {
-    stop();
-    if (js != null) jsOut.textContent = js;
-    if (!ok) { addLine('✖ ' + error, 'err'); setStatus('هەڵە', 'bad'); }
-    else { if (!output.childNodes.length) addLine('(هیچ دەرچوونێک نییە)', 'info'); setStatus('✓ تەواو بوو', 'ok'); }
-  }
-
-  function runOnMainThread(src) {
-    const r = Kodker.run(src, { print: (t) => addLine(t) });
-    finish(r.ok, r.js, r.error);
-  }
-
+  let job = null;
   function run() {
-    stop();
+    if (job) job.stop();
     output.textContent = '';
     setStatus('...');
-    const src = code.value;
-    try {
-      worker = new Worker('worker.js');
-    } catch (e) {
-      return runOnMainThread(src); // نموونە: کاتێک لە file:// دەکرێتەوە
-    }
-    worker.onmessage = (ev) => {
-      const d = ev.data;
-      if (d.type === 'out') addLine(d.text);
-      else if (d.type === 'done') finish(d.ok, d.js, d.error);
-    };
-    worker.onerror = () => { stop(); runOnMainThread(src); };
-    timer = setTimeout(() => {
-      stop();
-      addLine('✖ کۆدەکەت زیاتر لە ٥ چرکەی خایاند و وەستێنرا. لەوانەیە بازنەی بێکۆتایی هەبێت.', 'err');
-      setStatus('کاتی تەواو بوو', 'bad');
-    }, TIMEOUT_MS);
-    worker.postMessage(src);
+    const src = editor.getValue();
     try { jsOut.textContent = Kodker.transpile(src); } catch (e) { jsOut.textContent = '// ' + e.message; }
+    job = KodkerRunner.run(src, {
+      out: (t) => addLine(t),
+      done: (r) => {
+        if (r.js != null) jsOut.textContent = r.js;
+        if (r.timedOut) { addLine('✖ ' + r.error, 'err'); setStatus('کاتی تەواو بوو', 'bad'); }
+        else if (!r.ok) { addLine('✖ ' + r.error, 'err'); setStatus('هەڵە', 'bad'); }
+        else { if (!output.childNodes.length) addLine('(هیچ دەرچوونێک نییە)', 'info'); setStatus('✓ تەواو بوو', 'ok'); }
+      },
+    });
   }
 
   $('run').addEventListener('click', run);
-  code.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); run(); }
-    else if (e.key === 'Tab') {
-      e.preventDefault();
-      const s = code.selectionStart;
-      code.setRangeText('  ', s, code.selectionEnd, 'end');
-    }
-  });
 
   $('share').addEventListener('click', async () => {
-    const url = location.origin + location.pathname + '#code=' + encode(code.value);
+    const url = location.origin + location.pathname + '#code=' + encode(editor.getValue());
     history.replaceState(null, '', url);
     try { await navigator.clipboard.writeText(url); setStatus('✓ بەستەر کۆپی کرا', 'ok'); }
     catch (e) { setStatus('بەستەر لە ناونیشانەکە دایە', 'ok'); }

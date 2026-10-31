@@ -19,6 +19,7 @@
       <span class="ver" id="ver"></span>
     </div>
     <nav>
+      <a href="tutorial.html">🎓 فێرکاری</a>
       <a href="#guide">ڕێنمایی</a>
       <a href="https://github.com/HamaLeo/HamaLeo" target="_blank" rel="noopener">GitHub</a>
     </nav>
@@ -27,6 +28,7 @@
   <section class="hero">
     <h2>کۆد بنووسە بە <span class="hl">زمانی دایکت</span></h2>
     <p>زمانێکی پڕۆگرامینگی کراوە (open-source) بە سینتاکسی کوردی. ڕاستەوخۆ لێرە جێبەجێی بکە، بێ دابەزاندن.</p>
+    <p><a class="cta" href="tutorial.html">🎓 فێرکاری هەنگاو بە هەنگاو دەست پێبکە</a></p>
   </section>
 
   <main class="playground">
@@ -36,7 +38,7 @@
         <select id="examples" aria-label="نموونەکان"></select>
         <button id="share" title="بەستەرێک دروست بکە">🔗 هاوبەشکردن</button>
       </div>
-      <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" dir="rtl" aria-label="کۆد"></textarea>
+      <div id="editor"></div>
     </section>
 
     <section class="pane">
@@ -65,6 +67,8 @@
 
   <script src="kodker.js"></script>
   <script src="examples.js"></script>
+  <script src="runner.js"></script>
+  <script src="editor.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

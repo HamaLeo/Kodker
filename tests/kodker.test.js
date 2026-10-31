@@ -135,3 +135,35 @@ test('docs/examples.js نوێیە', () => {
     assert.ok(src.includes(JSON.stringify(fs.readFileSync(path.join(dir, f), 'utf8').trimEnd() + '\n').slice(1, -1)), `${f} لە docs/examples.js نییە، npm run build بکە`);
   }
 });
+
+test('هایلایت: دەقەکە بە تەواوی دەپارێزرێت', () => {
+  const src = '// کۆمێنت\nئەگەر x > ٥ { چاپ("a<b&c") }‏\nبۆ i لە ١ تا ٣ {}';
+  const html = K.highlight(src);
+  const plain = html.replace(/<[^>]+>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+  assert.strictEqual(plain, src);
+  assert.match(html, /<span class="t-k">ئەگەر<\/span>/);
+  assert.match(html, /<span class="t-f">چاپ<\/span>/);
+  assert.match(html, /<span class="t-s">"a&lt;b&amp;c"<\/span>/);
+  assert.match(html, /<span class="t-n">٥<\/span>/);
+  assert.match(html, /<span class="t-c">\/\/ کۆمێنت<\/span>/);
+});
+
+test('هایلایت: ناوی کار و میتۆد', () => {
+  const html = K.highlight('کار کۆ() {}\nل.زیادبکە(١)');
+  assert.match(html, /<span class="t-d">کۆ<\/span>/);
+  assert.match(html, /<span class="t-p">زیادبکە<\/span>/);
+});
+
+test('وانەکان: وەڵامی هەر وانەیەک دەبێت تێپەڕێت', () => {
+  const { lessons, check } = require('../docs/lessons.js');
+  assert.ok(lessons.length >= 10);
+  for (const [i, l] of lessons.entries()) {
+    const r = out(l.solution);
+    assert.ok(r.ok, `وانە ${i + 1}: ${r.error}`);
+    const c = check(l, r.lines, l.solution, K);
+    assert.ok(c.ok, `وانە ${i + 1} (${l.title}): ${c.reason} ${JSON.stringify(c.got)}`);
+    // کۆدی دەستپێک نابێت خۆی بەخۆی تێپەڕێت
+    const s = out(l.starter);
+    assert.ok(!check(l, s.lines, l.starter, K).ok, `وانە ${i + 1}: کۆدی دەستپێک پێشتر وەڵامە`);
+  }
+});
