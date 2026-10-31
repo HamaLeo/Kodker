@@ -167,3 +167,85 @@ test('وانەکان: وەڵامی هەر وانەیەک دەبێت تێپەڕێ
     assert.ok(!check(l, s.lines, l.starter, K).ok, `وانە ${i + 1}: کۆدی دەستپێک پێشتر وەڵامە`);
   }
 });
+
+// ── تەواوکردنی خۆکار ──
+const labels = (src, pos) => {
+  const r = K.completions(src, pos === undefined ? src.length : pos);
+  return r ? r.items.map((i) => i.label) : null;
+};
+
+test('تەواوکردن: فەنکشنی ئامادەکراو و وشە سەرەکییەکان', () => {
+  assert.deepStrictEqual(labels('چا'), ['چاپ']);
+  assert.deepStrictEqual(labels('ئە'), ['ئەمە', 'ئەگەر', 'ئەگەرنا']);
+});
+
+test('تەواوکردن: ڕیزبەندی (وشە، فەنکشن، گۆڕاو)', () => {
+  const l = labels('گۆڕاو چاپکەر = ١\nچا');
+  assert.deepStrictEqual(l, ['چاپ', 'چاپکەر']);
+});
+
+test('تەواوکردن: میتۆدی دوای خاڵ', () => {
+  const r = K.completions('ل.زی', 4);
+  assert.deepStrictEqual(r.items.map((i) => [i.label, i.template]), [['زیادبکە', 'زیادبکە($0)']]);
+  const d = K.completions('ل.در', 4);
+  assert.deepStrictEqual(d.items.map((i) => [i.label, i.template]), [['درێژی', 'درێژی']]);
+});
+
+test('تەواوکردن: گۆڕاوەکانی ناو کۆدەکە', () => {
+  assert.deepStrictEqual(labels('گۆڕاو ژمارەکان = ١\nژم'), ['ژمارەکان']);
+});
+
+test('تەواوکردن: تایبەتمەندییەکانی ئۆبجێکت دوای خاڵ', () => {
+  assert.deepStrictEqual(labels('ئەمە.پانی = ١\nئەمە.پا'), ['پاککەرەوە', 'پاڵاوتن', 'پانی']);
+});
+
+test('تەواوکردن: نە لە ناو دەق، نە کۆمێنت، نە کاتی ناونانی نوێ', () => {
+  assert.strictEqual(labels('چاپ("چا'), null);
+  assert.strictEqual(labels('// چا'), null);
+  assert.strictEqual(labels('گۆڕاو چا'), null);
+  assert.strictEqual(labels('کار چا'), null);
+  assert.strictEqual(labels('بۆ چا'), null);
+});
+
+test('تەواوکردن: نە لە ناوەڕاستی وشە، نە بێ پێشگر', () => {
+  assert.strictEqual(labels('چاپ', 2), null);
+  assert.strictEqual(labels(''), null);
+  assert.strictEqual(labels('چاپ('), null);
+});
+
+test('تەواوکردن: وشەی تەواو و بێ قاڵب پێشنیار نابێت، بەڵام قاڵبەکان دەمێننەوە', () => {
+  assert.strictEqual(labels('ل.درێژی'), null);          // میتۆدی بێ قاڵب
+  assert.strictEqual(labels('هیچ'), null);               // وشەی بێ قاڵب
+  const r = K.completions('بۆ', 2);                      // «بۆ» تەواو نووسراوە، بەڵام قاڵبی هەیە
+  assert.deepStrictEqual(r.items.map((i) => i.template), ['بۆ i لە ١ تا $0 {\n  \n}']);
+  assert.deepStrictEqual(K.completions('کار', 3).items.map((i) => i.template), ['کار $0() {\n  \n}']);
+});
+
+test('تەواوکردن: پیتی عەرەبی (ك) یەکدەخرێت', () => {
+  assert.deepStrictEqual(labels('كا'), ['کار']);
+});
+
+test('تەواوکردن: قاڵبی ئەگەر و ڕێژەی شوێن', () => {
+  const r = K.completions('ئەگە', 4);
+  const it = r.items.find((i) => i.label === 'ئەگەر');
+  assert.strictEqual(it.template, 'ئەگەر $0 {\n  \n}');
+  assert.strictEqual(r.from, 0);
+  assert.strictEqual(r.to, 4);
+});
+
+test('تەواوکردن: from/to لە ناوەڕاستی کۆد', () => {
+  const src = 'چاپ(١)\nهەڕە';
+  const r = K.completions(src, src.length);
+  assert.strictEqual(r.from, 7);
+  assert.strictEqual(src.slice(r.from, r.to), 'هەڕە');
+  assert.deepStrictEqual(r.items.map((i) => i.label), ['هەڕەمەکی']);
+});
+
+test('تەواوکردن: هەموو قاڵبەکان $0 یان کۆدی دروستن', () => {
+  for (const kw of ['ئەگەر', 'ئەگەرنا', 'هەتا', 'بۆ', 'کار', 'پۆل', 'تاقیبکەرەوە']) {
+    const r = K.completions(kw.slice(0, -1) + 'X'.repeat(0), kw.length - 1);
+    assert.ok(r, kw);
+    const it = r.items.find((i) => i.label === kw);
+    assert.ok(it && it.template.includes('$0'), kw + ' قاڵبی نییە');
+  }
+});

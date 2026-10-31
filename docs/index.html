@@ -5,64 +5,151 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>کۆدکەر — پڕۆگرامینگ بە زمانی کوردی</title>
   <meta name="description" content="کۆدکەر زمانێکی پڕۆگرامینگی کراوەیە بە سینتاکسی کوردی. لە وێبگەڕەکەت کۆد بنووسە و جێبەجێی بکە، بێ دابەزاندن.">
+  <meta name="theme-color" content="#0b0f1f">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <meta property="og:type" content="website">
   <meta property="og:title" content="کۆدکەر — پڕۆگرامینگ بە زمانی کوردی">
   <meta property="og:description" content="کۆد بنووسە بە زمانی دایکت. ئەگەر، بۆ، چاپ ... بۆ JavaScript دەگۆڕدرێت.">
+  <meta property="og:url" content="https://hamaleo.github.io/kodker/">
+  <meta property="og:image" content="https://hamaleo.github.io/kodker/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="flag-bar" aria-hidden="true"><i></i><i></i><i></i></div>
 
   <header class="top">
-    <div class="brand">
-      <span class="logo" aria-hidden="true">☀</span>
-      <h1>کۆدکەر</h1>
-      <span class="ver" id="ver"></span>
+    <div class="wrap bar-row">
+      <a class="brand" href="./">
+        <img src="logo.svg" alt="" width="40" height="40">
+        <span class="name">کۆدکەر</span>
+        <span class="ver" id="ver"></span>
+      </a>
+      <nav aria-label="سەرەکی">
+        <a href="#playground">Playground</a>
+        <a href="tutorial.html">فێرکاری</a>
+        <a href="#guide">ڕێنمایی</a>
+        <a class="gh" href="https://github.com/HamaLeo/kodker" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub
+        </a>
+      </nav>
     </div>
-    <nav>
-      <a href="tutorial.html">🎓 فێرکاری</a>
-      <a href="#guide">ڕێنمایی</a>
-      <a href="https://github.com/HamaLeo/kodker" target="_blank" rel="noopener">GitHub</a>
-    </nav>
   </header>
 
   <section class="hero">
-    <h2>کۆد بنووسە بە <span class="hl">زمانی دایکت</span></h2>
-    <p>زمانێکی پڕۆگرامینگی کراوە (open-source) بە سینتاکسی کوردی. ڕاستەوخۆ لێرە جێبەجێی بکە، بێ دابەزاندن.</p>
-    <p><a class="cta" href="tutorial.html">🎓 فێرکاری هەنگاو بە هەنگاو دەست پێبکە</a></p>
+    <img class="sunbg" src="logo.svg" alt="" aria-hidden="true">
+    <div class="wrap">
+      <span class="pill">✦ زمانی پڕۆگرامینگی کراوە بە کوردی</span>
+      <h1 class="title">کۆد بنووسە بە <span class="hl">زمانی دایکت</span></h1>
+      <p class="lead">سینتاکسی کوردی کە دەگۆڕدرێت بۆ JavaScript. لە وێبگەڕەکەتدا بنووسە، جێبەجێی بکە و فێربە، بێ دابەزاندن و بێ هیچ ڕێکخستنێک.</p>
+      <div class="cta-row">
+        <a class="btn sun" href="#playground">▶ دەستپێبکە</a>
+        <a class="btn ghost" href="tutorial.html">🎓 فێرکاری هەنگاو بە هەنگاو</a>
+      </div>
+      <ul class="stats" aria-label="ئامار">
+        <li><b>١١</b><span>وانە</span></li>
+        <li><b>٩</b><span>نموونە</span></li>
+        <li><b>٠</b><span>پاکێج</span></li>
+        <li><b>MIT</b><span>مۆڵەت</span></li>
+      </ul>
+    </div>
   </section>
 
-  <main class="playground">
-    <section class="pane">
-      <div class="bar">
-        <button id="run" class="primary" title="Ctrl + Enter">▶ جێبەجێبکە</button>
-        <select id="examples" aria-label="نموونەکان"></select>
-        <button id="share" title="بەستەرێک دروست بکە">🔗 هاوبەشکردن</button>
-      </div>
-      <div id="editor"></div>
-    </section>
+  <main class="wrap" id="playground">
+    <div class="playground">
+      <section class="pane">
+        <div class="bar">
+          <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <button id="run" class="primary" title="Ctrl + Enter">▶ جێبەجێبکە</button>
+          <select id="examples" aria-label="نموونەکان"></select>
+          <button id="share" title="بەستەرێک دروست بکە">🔗 هاوبەشکردن</button>
+        </div>
+        <div id="editor"></div>
+        <div class="foot"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> جێبەجێکردن <span class="sep">·</span> <kbd>Tab</kbd> تەواوکردنی خۆکار</div>
+      </section>
 
-    <section class="pane">
-      <div class="bar tabs">
-        <button class="tab active" data-tab="output">دەرچوون</button>
-        <button class="tab" data-tab="js">JavaScript</button>
-        <span id="status" class="status"></span>
-      </div>
-      <pre id="output" class="out" dir="rtl"></pre>
-      <pre id="js" class="out" dir="ltr" hidden></pre>
-    </section>
+      <section class="pane">
+        <div class="bar tabs">
+          <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <button class="tab active" data-tab="output">دەرچوون</button>
+          <button class="tab" data-tab="js">JavaScript</button>
+          <span id="status" class="status"></span>
+        </div>
+        <pre id="output" class="out" dir="rtl"></pre>
+        <pre id="js" class="out" dir="ltr" hidden></pre>
+      </section>
+    </div>
   </main>
 
-  <section class="guide" id="guide">
-    <h2>ڕێنمایی خێرا</h2>
+  <section class="wrap section">
+    <h2 class="h2">بۆچی کۆدکەر؟</h2>
+    <div class="features">
+      <article class="feature">
+        <span class="ico"><svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>
+        <h3>سینتاکسی کوردی</h3>
+        <p><code>ئەگەر</code>، <code>بۆ</code>، <code>کار</code>، <code>چاپ</code> ... ژمارەی کوردی <code>٠١٢٣</code> و فاریزەی <code>،</code> ش کار دەکەن.</p>
+      </article>
+      <article class="feature">
+        <span class="ico"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+        <h3>بێ دابەزاندن</h3>
+        <p>هەموو شتێک لە وێبگەڕەکەتدا کار دەکات: هایلایتکردنی سینتاکس، تەواوکردنی خۆکار و هاوبەشکردنی کۆد بە بەستەر.</p>
+      </article>
+      <article class="feature">
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></span>
+        <h3>فێرکاری ئەنتەراکتیڤ</h3>
+        <p>١١ وانە لە «چاپ» هەتا «پۆل»، هەر یەکە بە ئەرک و پشکنینی خۆکار. پێشکەوتنت هەڵدەگیرێت.</p>
+      </article>
+      <article class="feature">
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
+        <h3>ئاسوودە و کراوە</h3>
+        <p>بازنەی بێکۆتایی دەوەستێنرێت، هەڵەکان بە کوردین، و سەرچاوەکە بە مۆڵەتی MIT کراوەیە.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="wrap section">
+    <h2 class="h2">چۆن کار دەکات؟</h2>
+    <div class="showcase">
+      <div class="code-card">
+        <div class="code-head"><span>کۆدکەر</span><i class="badge kd">.kd</i></div>
+        <pre id="demo-kd" dir="rtl"></pre>
+      </div>
+      <div class="arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="28" height="28"><path d="M19 12H5M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <small>دەگۆڕدرێت</small>
+      </div>
+      <div class="code-card">
+        <div class="code-head"><span>JavaScript</span><i class="badge js">.js</i></div>
+        <pre id="demo-js" dir="ltr"></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap section" id="guide">
+    <h2 class="h2">ڕێنمایی خێرا</h2>
     <div class="cards" id="cards"></div>
     <p class="note">
-      تێبینی: ژمارەکان بە ٠١٢٣ یان 0123 هەردووکیان دەنووسرێن. بۆ کۆمێنت <code dir="ltr">//</code> بەکاربهێنە.
-      فاریزەی کوردی «،» دەتوانرێت لە جیاتی «,» بەکاربهێنرێت.
+      هەر شتێک دوای <code dir="ltr">//</code> کۆمێنتە. ژمارەکان بە <code>٠١٢٣</code> یان <code>0123</code> دەنووسرێن.
+      بۆ تەواوکردنی خۆکار دەستپێبکە بە نووسینی وشەیەک و <kbd>Enter</kbd> یان <kbd>Tab</kbd> دابگرە
+      (بۆ نموونە <code>بۆ</code> قاڵبی بازنە دەنووسێت).
     </p>
   </section>
 
-  <footer>
-    دروستکراوە بە ❤️ بۆ کۆمەڵگەی کورد · <a href="https://github.com/HamaLeo/kodker" target="_blank" rel="noopener">سەرچاوە لە GitHub</a> · MIT
+  <footer class="site-foot">
+    <div class="wrap foot-row">
+      <div class="foot-brand">
+        <img src="logo.svg" alt="" width="34" height="34">
+        <div><b>کۆدکەر</b><small>پڕۆگرامینگ بە زمانی کوردی</small></div>
+      </div>
+      <nav class="foot-links" aria-label="بەستەرەکان">
+        <a href="#playground">Playground</a>
+        <a href="tutorial.html">فێرکاری</a>
+        <a href="https://github.com/HamaLeo/kodker" target="_blank" rel="noopener">سەرچاوە</a>
+        <a href="https://github.com/HamaLeo/kodker/issues" target="_blank" rel="noopener">کێشەیەک بنێرە</a>
+      </nav>
+    </div>
+    <p class="copy">دروستکراوە بە ❤️ بۆ کۆمەڵگەی کورد · MIT © 2026</p>
   </footer>
 
   <script src="kodker.js"></script>
