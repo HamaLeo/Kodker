@@ -47,10 +47,22 @@ const titles = {
   '42-windtree': '🌳 درەختی بای',
   '43-galaxy': '🌌 کەهکەشان',
   '44-cradle': '⚖ بیشکەی نیوتن',
+  '45-tetris': '🎮 تێتریس (یاری)',
+  '46-frogger': '🎮 بۆقە (یاری)',
+  '47-platformer': '🎮 سکەکان (یاری)',
+  '48-mandelbrot': '🌀 مەندەلبرۆت',
+  '49-spiro': '🎡 سپیرۆگراف',
+  '50-city': '🌃 شاری شەو',
 };
 
 // گرووپ: code | art | game  — و وەسف و کۆنترۆڵ بۆ گەلەری سەرەکی
 const meta = {
+  '45-tetris': { group: 'game', desc: 'کلاسیکی تێتریس بە ڕیزی پڕ و خاڵ.', hint: '← → ↑ ↓ بۆشایی', thumb: 90 },
+  '46-frogger': { group: 'game', desc: 'لە ڕێگا و ڕووباردا بپەڕەوە.', hint: 'تیرەکان', thumb: 20 },
+  '47-platformer': { group: 'game', desc: 'بازبدە و سکەکان کۆبکەرەوە.', hint: '← → ↑', thumb: 40 },
+  '48-mandelbrot': { group: 'art', desc: 'فراکتاڵی مەندەلبرۆت.', hint: '', thumb: 1 },
+  '49-spiro': { group: 'art', desc: 'سپیرۆگرافی زیندوو بە ماوس.', hint: 'ماوس', thumb: 300 },
+  '50-city': { group: 'art', desc: 'شاری شەوێک و ئەستێرەی لەرزۆک.', hint: 'کلیک', thumb: 20 },
   '39-asteroids': { group: 'game', desc: 'بسووڕێ، هێز بدە و بەردەکان بتەقێنە.', hint: '← → ↑ و بۆشایی', thumb: 20 },
   '40-2048': { group: 'game', desc: 'ژمارەکان تێکەڵ بکە هەتا ٢٠٤٨.', hint: 'تیرەکان', thumb: 4 },
   '41-lunar': { group: 'game', desc: 'بە نەرمی لەسەر مانگ بنیشەوە.', hint: '← → ↑', thumb: 90 },
