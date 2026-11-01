@@ -41,10 +41,22 @@ const titles = {
   '36-snow': '❄ بەفر',
   '37-waves': '🌊 شەپۆل',
   '38-sort': '🔢 ڕیزکردن (Bubble Sort)',
+  '39-asteroids': '🎮 ئەستێرۆیید (یاری)',
+  '40-2048': '🎮 ٢٠٤٨ (یاری)',
+  '41-lunar': '🎮 نیشتنەوە لەسەر مانگ (یاری)',
+  '42-windtree': '🌳 درەختی بای',
+  '43-galaxy': '🌌 کەهکەشان',
+  '44-cradle': '⚖ بیشکەی نیوتن',
 };
 
 // گرووپ: code | art | game  — و وەسف و کۆنترۆڵ بۆ گەلەری سەرەکی
 const meta = {
+  '39-asteroids': { group: 'game', desc: 'بسووڕێ، هێز بدە و بەردەکان بتەقێنە.', hint: '← → ↑ و بۆشایی', thumb: 20 },
+  '40-2048': { group: 'game', desc: 'ژمارەکان تێکەڵ بکە هەتا ٢٠٤٨.', hint: 'تیرەکان', thumb: 4 },
+  '41-lunar': { group: 'game', desc: 'بە نەرمی لەسەر مانگ بنیشەوە.', hint: '← → ↑', thumb: 90 },
+  '42-windtree': { group: 'art', desc: 'درەختێک کە لە با دەلەرێتەوە.', hint: 'ماوس', thumb: 30 },
+  '43-galaxy': { group: 'art', desc: 'کەهکەشانی دەسووڕێتەوە.', hint: 'ماوس', thumb: 60 },
+  '44-cradle': { group: 'art', desc: 'بیشکەی نیوتنی فیزیایی.', hint: '', thumb: 20 },
   '33-maze': { group: 'game', desc: 'سکەکان کۆبکەرەوە و دەرچوون بدۆزەوە.', hint: 'تیرەکان', thumb: 2 },
   '34-cars': { group: 'game', desc: 'لە ئوتومبێلەکان ڕابکە.', hint: '← → / کلیک', thumb: 70 },
   '35-simon': { group: 'game', desc: 'ڕیزبەندی ڕەنگەکان دووبارە بکەرەوە.', hint: 'کلیک', thumb: 60 },
