@@ -53,10 +53,22 @@ const titles = {
   '48-mandelbrot': '🌀 مەندەلبرۆت',
   '49-spiro': '🎡 سپیرۆگراف',
   '50-city': '🌃 شاری شەو',
+  '51-pacman': '🎮 خۆرەکێش (یاری)',
+  '52-doodle': '🎮 باز بدە (یاری)',
+  '53-connect4': '🎮 چوار بە دووی یەک (یاری)',
+  '54-dna': '🧬 DNA',
+  '55-sunflower': '🌻 گوڵی خۆرەتاو',
+  '56-rain': '🌧 باران',
 };
 
 // گرووپ: code | art | game  — و وەسف و کۆنترۆڵ بۆ گەلەری سەرەکی
 const meta = {
+  '51-pacman': { group: 'game', desc: 'خاڵەکان بخۆ و لە ڕۆحەکان ڕابکە.', hint: 'تیرەکان', thumb: 30 },
+  '52-doodle': { group: 'game', desc: 'بەرەو ئاسمان باز بدە!', hint: '← → / ماوس', thumb: 40 },
+  '53-connect4': { group: 'game', desc: 'چوار بە دووی یەک دژی کۆمپیوتەر.', hint: 'کلیک', thumb: 3 },
+  '54-dna': { group: 'art', desc: 'دوو ڕیسی DNA کە دەسووڕێن.', hint: '', thumb: 30 },
+  '55-sunflower': { group: 'art', desc: 'تۆی گوڵ بە گۆشەی زێڕین.', hint: 'ماوس', thumb: 3 },
+  '56-rain': { group: 'art', desc: 'باران و بازنەی ئاو.', hint: 'کلیک', thumb: 120 },
   '45-tetris': { group: 'game', desc: 'کلاسیکی تێتریس بە ڕیزی پڕ و خاڵ.', hint: '← → ↑ ↓ بۆشایی', thumb: 90 },
   '46-frogger': { group: 'game', desc: 'لە ڕێگا و ڕووباردا بپەڕەوە.', hint: 'تیرەکان', thumb: 20 },
   '47-platformer': { group: 'game', desc: 'بازبدە و سکەکان کۆبکەرەوە.', hint: '← → ↑', thumb: 40 },
