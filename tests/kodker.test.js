@@ -613,8 +613,8 @@ test('یاریبکە: هەڵەی ناو فریم ڕاپۆرت دەکرێت و ی
 
 test('نموونەی یارییەکان: هەموو فریمەکان بێ هەڵە کار دەکەن لەگەڵ هەموو جۆرە ئینپوتێک', () => {
   const dir = path.join(__dirname, '..', 'examples');
-  const games = fs.readdirSync(dir).filter((f) => /^(16|17|18|19|20|21|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38)-/.test(f));
-  assert.ok(games.length >= 22);
+  const games = fs.readdirSync(dir).filter((f) => /^(16|17|18|19|20|21|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44)-/.test(f));
+  assert.ok(games.length >= 28);
   for (const f of games) {
     const r = K.run(fs.readFileSync(path.join(dir, f), 'utf8'), { print() {} });
     assert.ok(r.ok && r.game, f + ': ' + r.error);
@@ -629,7 +629,7 @@ test('نموونەی یارییەکان: هەموو فریمەکان بێ هەڵ
 test('گەلەری نموونە: هەر نموونەیەک گرووپ و ناونیشانی هەیە', () => {
   const src = fs.readFileSync(path.join(__dirname, '..', 'docs', 'examples.js'), 'utf8');
   const ex = JSON.parse(src.slice(src.indexOf('['), src.lastIndexOf(']') + 1));
-  assert.ok(ex.length >= 38);
-  assert.ok(ex.filter((e) => e.group === 'game').length >= 13);
+  assert.ok(ex.length >= 44);
+  assert.ok(ex.filter((e) => e.group === 'game').length >= 16);
   for (const e of ex) { assert.ok(['code', 'art', 'game'].includes(e.group), e.id); assert.ok(e.title && e.code, e.id); }
 });
